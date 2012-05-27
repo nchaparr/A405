@@ -87,13 +87,15 @@ def main(tmin, tmax, pmin, pmax):
     p = result['p']
     RH = result['RH']
     r = thermo.p_T_RH_to_r(p, T, RH)
-    T_wsat = np.zeros(93)
-    for i in range(93):
-        T_wsat[i] = ConstantWsat.WsatTemp(p[i], .0001)
+    indexlim = 47 
+    T_wsat = np.zeros(indexlim)
+    for i in range(indexlim):
+        print ConstantWsat.WsatShift(200, p[i], .01), ConstantWsat.WsatShift(330, p[i], .01), p[i], i
+        T_wsat[i] = ConstantWsat.WsatTemp(p[i], .01)
     make_skewT(tmin, tmax, pmax, pmin)
-    tee, pee = skewIt(T[0:92,], p[0:92,], 30.)
+    tee, pee = skewIt(T[0:indexlim,], p[0:indexlim,], 30.)
     plot(tee, pee, 'r')
-    tee1, pee1 = skewIt(T_wsat[0:92,], p[0:92,], 30.)
+    tee1, pee1 = skewIt(T_wsat[0:indexlim,], p[0:indexlim,], 30.)
     print "tee", tee, "tee1", tee1
     plot(tee1, pee1, 'g')
     axis([tmin, tmax, pmax, pmin])
