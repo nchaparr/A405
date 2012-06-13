@@ -5,6 +5,7 @@ import matplotlib as mpl
 import sys
 import thermo
 import scipy.optimize.zeros as scizeros
+import ConstantWsat
 
 def make_skewT(tmin, tmax, pmax, pmin, skew=30.):
     #make a blank skewT diagram
@@ -44,15 +45,15 @@ def make_skewT(tmin, tmax, pmax, pmin, skew=30.):
         axhline(line, ls=':', color='k', linewidth=.5)
     thetaLabels = arange(200., 380., 10.)
     con2 = contour(xplot, yplot, th, levels = thetaLabels, colors='b', linewidths=.5)
-    rsLabels = [.1,.2,.4,.6, 1, 2, 3, 4, 5, 6, 8, 10, 15, 20, 25, 30, 40]
-    con3 = contour(xplot, yplot, rstar*1.e3, levels=rsLabels, colors='g', linewidths=.5)
-    thetaeLabels = linspace(200,400,21)
-    con4 = contour(xplot, yplot, thetaeVals, levels = thetaeLabels, colors='r', linewidths=.5)
+    #rsLabels = [.1,.2,.4,.6, 1, 2, 3, 4, 5, 6, 8, 10, 15, 20, 25, 30, 40]
+    #con3 = contour(xplot, yplot, rstar*1.e3, levels=rsLabels, colors='g', linewidths=.5)
+    #thetaeLabels = linspace(200,400,21)
+    #con4 = contour(xplot, yplot, thetaeVals, levels = thetaeLabels, colors='r', linewidths=.5)
     axis([tmin, tmax, pmax, pmin])
     clabel(con1, inline = False, fmt = '%1.0f')
     clabel(con2, inline = False, fmt = '%1.0f')
-    clabel(con3, inline = False, fmt = '%1.1f')
-    clabel(con4, inline = False, fmt = '%1.0f')
+    #clabel(con3, inline = False, fmt = '%1.1f')
+    #clabel(con4, inline = False, fmt = '%1.0f')
     title('skew T - lnp chart')
     ylabel('pressure (hPa)')
     xlabel('temperature (black, degrees C)')
@@ -71,8 +72,8 @@ def get_sounding(filename):
     for line in soundingfile:
         line = line.split()
         p.append( float(line[0])*100. )
-        T.append( float(line[1]) + 273.15 )
-        RH.append( float(line[2]) )
+        T.append( float(line[2]) + 273.15 )
+        RH.append( float(line[4]) )
         
     result = {}
     result['T'] = array(T)
@@ -86,12 +87,15 @@ def main(tmin, tmax, pmin, pmax):
     p = result['p']
     RH = result['RH']
     r = thermo.p_T_RH_to_r(p, T, RH)
-    T_dew = thermo.T_d(r, p)
+    T_wsat = np.zeros(93)
+    for i in range(93):
+        T_wsat[i] = ConstantWsat.WsatTemp(p[i], .0001)
     make_skewT(tmin, tmax, pmax, pmin)
-    tee, pee = skewIt(T, p, 30.)
-    plot(tee, pee, 'k-')
-    tee, pee = skewIt(T_dew, p, 30.)
-    plot(tee, pee, 'k-')
+    tee, pee = skewIt(T[0:92,], p[0:92,], 30.)
+    plot(tee, pee, 'r')
+    tee1, pee1 = skewIt(T_wsat[0:92,], p[0:92,], 30.)
+    print "tee", tee, "tee1", tee1
+    plot(tee1, pee1, 'g')
     axis([tmin, tmax, pmax, pmin])
     show()
  

@@ -1,4 +1,5 @@
- c=constants;
+function ezplot
+c=constants;
  %
  % yplot -- range of pressures in hPa
  % xplot -- range of temperatures in skew coords
@@ -86,5 +87,24 @@
  ylabel('press (hPa)')
  xlabel('Temp (deg C)')
  title('sounding 1')
+end 
  
-      
+ function skewX=convertTempToSkew(Temp,press,skew)
+     %input Temp  in degC and press in hPa
+     %output transformed Temp in potting coords
+     if(press > 1000);
+       fprintf('press %f is more than 1000 hPa, expecting mililbars',press)
+     end
+     if(Temp > 100);
+       fprintf('Temp %f is more than 100 degC, expecting centigrade',Temp)
+     end
+     skewX=Temp - skew*log(press);
+end     
+
+function Temp=convertSkewToTemp(xcoord,press,skew)
+     %inverse of Wallace and Hobbs 3.56
+     %xcoord in temperature plotting coordinates
+     %press in hPa
+     %output Temp in degC
+     Temp= xcoord  + skew*log(press);
+end         

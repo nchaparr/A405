@@ -1,7 +1,7 @@
-function theWs=wsat(TempK,pressPa)
+function theWs=wsat(TempK, pressPa)
   %usage: wsat(TempK,pressPa)
-  % in:  Temp = temperature in Kelvin (vector) 
-  % in:  ppress = pressure in Pa (scalar)
+  % in:  TempK = temperature in Kelvin (vector) 
+  % in:  pressPa = pressure in Pa (scalar)
   % out: theWs = saturation water vapor mixing ratio in (kg/kg)
   %note the vector multiplication and division
   c=constants;

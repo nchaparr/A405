@@ -15,28 +15,23 @@ print 'excercise 3.40'
 
 Rv = 461.51
 esat = 2300
-e1 = .6*esat
+e1 = 0.6*esat
+print 'initial e', e1
 T = 20 + 273.15
-V1 = 20
-V2 = 4
+V1 = 20*10**(-3)
+V2 = 4*10**(-3)
 
 rho1 = e1/(Rv*T)
-print rho1
+print 'initial density of water vapour', rho1
 
-rho2 = (1.0*V2/V1)*rho1
-print rho2
+mass1 = rho1*V1
+print 'initial mass of water vapour', mass1
 
-e2 = rho2*Rv*T
-print e2
+rho2 = 1.0*esat/(Rv*T)
+mass2 = rho2*V2
+print 'mass after decreasing volume, and increasing pressure above wsat', mass2
 
-econd = esat - e2
-print econd
-
-rhocond = econd/(Rv*T)
-print rhocond
-
-masscond = rhocond*V2
-print masscond
+print 'mass condensed out', mass1 - mass2
 
 print 'excercise 4.41'
 
