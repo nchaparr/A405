@@ -26,7 +26,8 @@ Tdew = (Tdewbot + slope*(press - Pbot));
 [rows,numPoints]=size(press);
 
 figHandle=figure(1);
-[figHandle,skew]=makeSkew(figHandle);
+skew=30.;
+[figureHandle,outputws,handlews]=makeSkew(figHandle,skew);
 %zoom the axis to focus on layer
 skewLimits=convertTempToSkew([5,30],1.e3,skew);
 axis([skewLimits(1),skewLimits(2),600,1000]);
@@ -80,7 +81,7 @@ for i=1:numPoints
 end
 % $$$ 
 figHandle=figure(2);
-[figHandle,skew]=makeSkew(figHandle);
+[figureHandle,outputws,handlews]=makeSkew(figHandle,skew);
 skewLimits=convertTempToSkew([5,30],1.e3,skew);
 axis([skewLimits(1),skewLimits(2),600,1000]);
 xplot1=convertTempToSkew(Temp - c.Tc,press,skew);
@@ -113,7 +114,7 @@ for i=1:numPoints
   Tdew(i)=findTdwv(wv,press(i)*100.);
 end
 figHandle=figure(3);
-[figHandle,skew]=makeSkew(figHandle);
+[figureHandle,outputws,handlews]=makeSkew(figHandle,skew);
 skewLimits=convertTempToSkew([5,30],1.e3,skew);
 axis([skewLimits(1),skewLimits(2),600,1000]);
 xplot1=convertTempToSkew(Temp - c.Tc,press,skew);
@@ -146,7 +147,7 @@ for i=1:numPoints
   Tdew(i)=findTdwv(wv,press(i)*100.);
 end
 figHandle=figure(4);
-[figHandle,skew]=makeSkew(figHandle);
+[figureHandle,outputws,handlews]=makeSkew(figHandle,skew);
 skewLimits=convertTempToSkew([5,30],1.e3,skew);
 axis([skewLimits(1),skewLimits(2),600,1000]);
 xplot1=convertTempToSkew(Temp - c.Tc,press,skew);
@@ -178,7 +179,7 @@ for i=1:numPoints
   Tdew(i)=findTdwv(wv,press(i)*100.);
 end
 figHandle=figure(5);
-[figHandle,skew]=makeSkew(figHandle);
+[figureHandle,outputws,handlews]=makeSkew(figHandle,skew);
 skewLimits=convertTempToSkew([5,30],1.e3,skew);
 axis([skewLimits(1),skewLimits(2),600,1000]);
 xplot1=convertTempToSkew(Temp - c.Tc,press,skew);
@@ -210,7 +211,7 @@ for i=1:numPoints
   Tdew(i)=findTdwv(wv,press(i)*100.);
 end
 figHandle=figure(6);
-[figHandle,skew]=makeSkew(figHandle);
+[figureHandle,outputws,handlews]=makeSkew(figHandle,skew);
 skewLimits=convertTempToSkew([5,30],1.e3,skew);
 axis([skewLimits(1),skewLimits(2),600,1000]);
 xplot1=convertTempToSkew(Temp - c.Tc,press,skew);
