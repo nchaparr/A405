@@ -1,0 +1,24 @@
+!    -*- f90 -*-
+! Note: the context of this file is case sensitive.
+
+python module mccla ! in 
+    interface  ! in :mccla
+        subroutine mccla(ctype,np,z,p,t,rvden,o3den,den) ! in :mccla:mcclatchey.f
+            character*(*) intent(in) :: ctype
+            integer intent(in) :: np
+            real dimension(np),intent(out),depend(np) :: z
+            real dimension(np),intent(out),depend(np) :: p
+            real dimension(np),intent(out),depend(np) :: t
+            real dimension(np),intent(out),depend(np) :: rvden
+            real dimension(np),intent(out),depend(np) :: o3den
+            real dimension(np),intent(out),depend(np) :: den
+        end subroutine mccla
+        subroutine errmsg(messag,fatal) ! in :mccla:mcclatchey.f
+            character*(*) :: messag
+            logical :: fatal
+        end subroutine errmsg
+    end interface 
+end python module mccla
+
+! This file was auto-generated with f2py (version:2).
+! See http://cens.ioc.ee/projects/f2py2e/

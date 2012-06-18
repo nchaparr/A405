@@ -1,0 +1,117 @@
+setting PATH for ubuntu
+/nfs/kite/home/nchaparr nchaparr@owl% cd A405
+/nfs/kite/home/nchaparr/A405 nchaparr@owl% cd June15
+/nfs/kite/home/nchaparr/A405/June15 nchaparr@owl% pdflatex Day12Problems
+This is pdfTeX, Version 3.1415926-1.40.10 (TeX Live 2009/Debian)
+entering extended mode
+(./Day12Problems
+LaTeX2e <2009/09/24>
+Babel <v3.8l> and hyphenation patterns for english, usenglishmax, dumylang, noh
+yphenation, loaded.
+
+! LaTeX Error: Missing \begin{document}.
+
+See the LaTeX manual or LaTeX Companion for explanation.
+Type  H <return>  for immediate help.
+ ...                                              
+                                                  
+l.1 s
+     etting PATH for ubuntu
+)
+*
+! Emergency stop.
+<*> Day12Problems
+                 
+!  ==> Fatal error occurred, no output PDF file produced!
+Transcript written on Day12Problems.log.
+/nfs/kite/home/nchaparr/A405/June15 nchaparr@owl% pdflatex Day12Problems
+This is pdfTeX, Version 3.1415926-1.40.10 (TeX Live 2009/Debian)
+entering extended mode
+(./Day12Problems.tex
+LaTeX2e <2009/09/24>
+Babel <v3.8l> and hyphenation patterns for english, usenglishmax, dumylang, noh
+yphenation, loaded.
+(/usr/share/texmf-texlive/tex/latex/base/article.cls
+Document Class: article 2007/10/19 v1.4h Standard LaTeX document class
+(/usr/share/texmf-texlive/tex/latex/base/size11.clo))
+(/usr/share/texmf-texlive/tex/latex/base/inputenc.sty
+(/usr/share/texmf-texlive/tex/latex/base/utf8.def
+(/usr/share/texmf-texlive/tex/latex/base/t1enc.dfu)
+(/usr/share/texmf-texlive/tex/latex/base/ot1enc.dfu)
+(/usr/share/texmf-texlive/tex/latex/base/omsenc.dfu)))
+(/usr/share/texmf-texlive/tex/latex/geometry/geometry.sty
+(/usr/share/texmf-texlive/tex/latex/graphics/keyval.sty)
+(/usr/share/texmf-texlive/tex/generic/oberdiek/ifpdf.sty)
+(/usr/share/texmf-texlive/tex/generic/oberdiek/ifvtex.sty))
+(/usr/share/texmf-texlive/tex/latex/amsfonts/amsfonts.sty)
+(/usr/share/texmf-texlive/tex/latex/graphics/color.sty
+(/etc/texmf/tex/latex/config/color.cfg)
+(/usr/share/texmf-texlive/tex/latex/pdftex-def/pdftex.def))
+(/usr/share/texmf-texlive/tex/latex/graphics/graphicx.sty
+(/usr/share/texmf-texlive/tex/latex/graphics/graphics.sty
+(/usr/share/texmf-texlive/tex/latex/graphics/trig.sty)
+(/etc/texmf/tex/latex/config/graphics.cfg)))
+(/usr/share/texmf-texlive/tex/latex/booktabs/booktabs.sty)
+(/usr/share/texmf-texlive/tex/latex/tools/array.sty)
+(/usr/share/texmf-texlive/tex/latex/paralist/paralist.sty)
+(/usr/share/texmf-texlive/tex/latex/tools/verbatim.sty)
+(/usr/share/texmf-texlive/tex/latex/subfig/subfig.sty
+(/usr/share/texmf-texlive/tex/latex/caption/caption.sty
+(/usr/share/texmf-texlive/tex/latex/caption/caption3.sty)))
+(/usr/share/texmf-texlive/tex/latex/fancyhdr/fancyhdr.sty)
+(/usr/share/texmf-texlive/tex/latex/sectsty/sectsty.sty)
+(/usr/share/texmf-texlive/tex/latex/tocbibind/tocbibind.sty
+
+Package tocbibind Note: The document has section divisions.
+
+
+Package tocbibind Note: Using section or other style headings.
+
+) (/usr/share/texmf-texlive/tex/latex/tocloft/tocloft.sty
+
+Package tocloft Note: The document has section divisions.
+
+) (/usr/share/texmf-texlive/tex/latex/amsmath/amsmath.sty
+For additional information on amsmath, use the `?' option.
+(/usr/share/texmf-texlive/tex/latex/amsmath/amstext.sty
+(/usr/share/texmf-texlive/tex/latex/amsmath/amsgen.sty))
+(/usr/share/texmf-texlive/tex/latex/amsmath/amsbsy.sty)
+(/usr/share/texmf-texlive/tex/latex/amsmath/amsopn.sty))
+No file Day12Problems.aux.
+*geometry auto-detecting driver*
+*geometry detected driver: pdftex*
+(/usr/share/texmf-texlive/tex/context/base/supp-pdf.mkii
+[Loading MPS to PDF converter (version 2006.09.02).]
+) (/usr/share/texmf-texlive/tex/latex/amsfonts/umsa.fd)
+(/usr/share/texmf-texlive/tex/latex/amsfonts/umsb.fd)
+Underfull \hbox (badness 10000) in paragraph at lines 100--101
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 102--103
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 109--110
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 113--114
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 119--120
+
+[1{/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}]
+Underfull \hbox (badness 10000) in paragraph at lines 125--126
+
+[2] (./Day12Problems.aux) )
+(see the transcript file for additional information)</usr/share/texmf-texlive/f
+onts/type1/public/amsfonts/cm/cmmi10.pfb></usr/share/texmf-texlive/fonts/type1/
+public/amsfonts/cm/cmmi6.pfb></usr/share/texmf-texlive/fonts/type1/public/amsfo
+nts/cm/cmmi8.pfb></usr/share/texmf-texlive/fonts/type1/public/amsfonts/cm/cmr10
+.pfb></usr/share/texmf-texlive/fonts/type1/public/amsfonts/cm/cmr12.pfb></usr/s
+hare/texmf-texlive/fonts/type1/public/amsfonts/cm/cmr17.pfb></usr/share/texmf-t
+exlive/fonts/type1/public/amsfonts/cm/cmr6.pfb></usr/share/texmf-texlive/fonts/
+type1/public/amsfonts/cm/cmr8.pfb></usr/share/texmf-texlive/fonts/type1/public/
+amsfonts/cm/cmsy10.pfb></usr/share/texmf-texlive/fonts/type1/public/amsfonts/cm
+/cmsy6.pfb></usr/share/texmf-texlive/fonts/type1/public/amsfonts/cm/cmsy8.pfb>
+Output written on Day12Problems.pdf (2 pages, 117775 bytes).
+Transcript written on Day12Problems.log.
+/nfs/kite/home/nchaparr/A405/June15 nchaparr@owl% 

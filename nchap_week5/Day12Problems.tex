@@ -1,0 +1,124 @@
+% !TEX TS-program = pdflatex
+% !TEX encoding = UTF-8 Unicode
+
+% This is a simple template for a LaTeX document using the "article" class.
+% See "book", "report", "letter" for other types of document.
+
+\documentclass[11pt]{article} % use larger type; default would be 10pt
+
+\usepackage[utf8]{inputenc} % set input encoding (not needed with XeLaTeX)
+
+%%% Examples of Article customizations
+% These packages are optional, depending whether you want the features they provide.
+% See the LaTeX Companion or other references for full information.
+
+%%% PAGE DIMENSIONS
+\usepackage{geometry} % to change the page dimensions
+\usepackage{amsfonts}
+\usepackage{color}
+\geometry{a4paper} % or letterpaper (US) or a5paper or....
+% \geometry{margins=2in} % for example, change the margins to 2 inches all round
+% \geometry{landscape} % set up the page for landscape
+%   read geometry.pdf for detailed page layout information
+
+\usepackage{graphicx} % support the \includegraphics command and options
+
+% \usepackage[parfill]{parskip} % Activate to begin paragraphs with an empty line rather than an indent
+
+%%% PACKAGES
+\usepackage{booktabs} % for much better looking tables
+\usepackage{array} % for better arrays (eg matrices) in maths
+\usepackage{paralist} % very flexible & customisable lists (eg. enumerate/itemize, etc.)
+\usepackage{verbatim} % adds environment for commenting out blocks of text & for better verbatim
+\usepackage{subfig} % make it possible to include more than one captioned figure/table in a single float
+% These packages are all incorporated in the memoir class to one degree or another...
+
+%%% HEADERS & FOOTERS
+\usepackage{fancyhdr} % This should be set AFTER setting up the page geometry
+\pagestyle{fancy} % options: empty , plain , fancy
+\renewcommand{\headrulewidth}{0pt} % customise the layout...
+\lhead{}\chead{}\rhead{}
+\lfoot{}\cfoot{\thepage}\rfoot{}
+
+%%% SECTION TITLE APPEARANCE
+\usepackage{sectsty}
+\allsectionsfont{\sffamily\mdseries\upshape} % (See the fntguide.pdf for font help)
+% (This matches ConTeXt defaults)
+
+%%% ToC (table of contents) APPEARANCE
+\usepackage[nottoc,notlof,notlot]{tocbibind} % Put the bibliography in the ToC
+\usepackage[titles,subfigure]{tocloft} % Alter the style of the Table of Contents
+\renewcommand{\cftsecfont}{\rmfamily\mdseries\upshape}
+\renewcommand{\cftsecpagefont}{\rmfamily\mdseries\upshape} % No bold!
+\usepackage{amsmath}
+%%% END Article customizations
+
+\setlength{\parindent}{0in}
+
+%%% The "real" document content comes below...
+
+
+
+\title{A 405 Day 12 Problems}
+
+\author{Niamh Chaparro}
+%\date{} % Activate to display a given date or no date (if empty),
+         % otherwise the current date is printed 
+
+\begin{document}
+
+\maketitle
+
+1\\
+
+The vapour pressure at V1 is $e = \frac{RH \times e_{sat}}{100} = .6 \times 2.337 \times 10^{3}  = 1402.2 Pa$\\
+
+e at V1 can be used to obtain the water vapour density at V1\\
+
+$\rho_v^{'} = \frac{e}{R_{v}T} = \frac{1402.2}{461.51 \times 293.15} = .010364 \ kg \ m^{-3}$\\
+
+and the mass is obtained as follows: $m_{w} = .010364 \times 20 \times 10^{-3} = .00020728 \ kg$.\\
+
+Does the change in volume result in vapour pressure exceeding saturation?\\
+
+$e_{2} = \frac{V_{1}}{V_{2}}e_{1} = \frac{20}{4}\times 1402.2 = 7011 \ Pa > e_{sat}$\\
+
+Yes, so the vapour pressure at V2 is $e_{sat}$ and the vapour density at V2 is\\
+
+$ \rho_{v2}^{'} = \frac{e_{sat}}{R_{v}T} = \frac{2337}{461.51 \times 293.15} = .017273792 \ kg \ m^{-3}$\\
+
+The new vapour mass is $.017273793 \times 4 \times 10^{-3} = 6.9095 \times 10^{-5} \ kg$\\
+
+so the mass of condensed water is  $(2.0728 - .69095) \times 10^{-4} = 1.38185 \times 10^{-4} \ kg$.\\
+
+
+2\\
+
+a\\
+
+The potential temperature is conserved: $\frac{\theta_{1}}{\theta_{2}} = 1 = \frac{T_{1}}{T_{2}}(\frac{P_{0}P_{2}}{P_{0}P_{1}})^{.286}$\\
+
+$T_{2} = T_{1}(\frac{P_{2}}{P_{1}})^{.286} = 373.783 K$\\
+
+(Aside:\\
+
+For the lower compartment $V_{2} = (1-X)V_{1}$ so $(1-X) = \frac{373.783 \times 1}{273 \times 3}$ and the difference in volume $X = 1 - \frac{373.783}{273 \times 3} = .544$
+)\\
+
+b\\
+
+For the lower compartment $\Delta q = \Delta u - \Delta w$.  Since there is no thermal energy supplied or lost $\Delta q = 0$ and the change in internal energy is equal to the work done by the thermally induced pressure increase in the upper compartment via the energetically neutral membrane: $\Delta u = \Delta w = c_{v} \Delta T = 72261.276 \ J \ kg^{-1}$\\
+
+c\\
+
+$\frac{T_{1}}{T_{2}} = \frac{P_{1}V_{1}}{P_{2}V_{2}} = \frac{1}{3 \times (1 + X)}$\\
+
+$T_{2} = 3 \times (1 + X) \times T_{1} = 1192 \ K$\\
+
+d\\
+
+The total thermal energy supplied in the upper compartment is that which causes the temperature to increase and the pressure and volume to increase:\\
+
+$\Delta q = \Delta u + \Delta w = c_{v} \times \Delta T + \Delta w = 717 \times (1192 - 273) + 72261.276 = 731184.276 \ J \ kg ^{-1}$\\
+
+\end{document}
