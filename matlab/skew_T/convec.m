@@ -46,6 +46,7 @@ pLCL=zeros([1 numPoints]);
 theTheta=zeros([1 numPoints]);
 theThetae=zeros([1 numPoints]);
 Tpseudo=zeros([1 numPoints]);
+TempPres=zeros([1 numPoints]);
 wtotal=zeros([1 numPoints]);
 for i=1:numPoints
   wtotal(i)=wsat(Tdew(i) + c.Tc,press(i)*100.);
@@ -54,7 +55,8 @@ for i=1:numPoints
   %find the temperature along the pseudo adiabat at press(i)
   Tpseudo(i)=findTmoist(theThetae(i),press(i)*100.);
   %no liquid water in sounding
-end
+  [TempPres(i),wv,wl]=tinvert_thetae(theThetae(i),wtotal(i),900*100.);
+ end
 xplot=convertTempToSkew(Tlcl(1) - c.Tc,pLCL(1)*0.01,skew);
 bot=plot(xplot,pLCL(1)*0.01,'ro','markerSize',12,'markerFaceColor','r');
 xplot=convertTempToSkew(Tlcl(numPoints) - c.Tc,pLCL(numPoints)*0.01,skew);
@@ -68,6 +70,10 @@ set(h,'interpreter','latex');
 print -dpdf base900_thetae.pdf
 hold off;
 
+disp('TempPres900');
+disp(TempPres);
+disp('wtot900');
+disp(wtotal);
 
 %figure 2 --------------------------------
 %lift by 50 hPa to base at 850 hPa
@@ -77,9 +83,14 @@ for i=1:numPoints
   Tpseudo(i)=findTmoist(theThetae(i),press(i)*100.);
   %find the actual temperature  and dewpoint
   [Temp(i),wv,wl]=tinvert_thetae(theThetae(i),wtotal(i),press(i)*100.);
+  [TempPres(i),wv,wl]=tinvert_thetae(theThetae(i),wtotal(i),850*100.);
   Tdew(i)=findTdwv(wv,press(i)*100.);
 end
-% $$$ 
+% $$$
+
+for i=1:numPoints
+  wtotal(i)=wsat(Tdew(i),press(i)*100.);
+end
 figHandle=figure(2);
 [figureHandle,outputws,handlews]=makeSkew(figHandle,skew);
 skewLimits=convertTempToSkew([5,30],1.e3,skew);
@@ -103,8 +114,14 @@ title('convectively unstable sounding: base at 850 hPa');
 print -dpdf base_850.pdf
 hold off;
 
+disp('TempPres850');
+disp(TempPres);
+disp('wtot850');
+disp(wtotal);
+
 %figure 3 --------------------------------
 %lift by another 1470 Pa to base at 835.3 hPa
+
 for i=1:numPoints
   press(i)=press(i) - 14.7;
   %find the temperature along the pseudoadiabats at press(i)
@@ -112,7 +129,13 @@ for i=1:numPoints
   %find the actual temperature  and dewpoint
   [Temp(i),wv,wl]=tinvert_thetae(theThetae(i),wtotal(i),press(i)*100.);
   Tdew(i)=findTdwv(wv,press(i)*100.);
+end 
+for i=1:numPoints
+  wtotal(i)=wsat(Tdew(i),press(i)*100.);
 end
+disp('wtotal');
+disp(wtotal);
+
 figHandle=figure(3);
 [figureHandle,outputws,handlews]=makeSkew(figHandle,skew);
 skewLimits=convertTempToSkew([5,30],1.e3,skew);
@@ -146,6 +169,13 @@ for i=1:numPoints
   [Temp(i),wv,wl]=tinvert_thetae(theThetae(i),wtotal(i),press(i)*100.);
   Tdew(i)=findTdwv(wv,press(i)*100.);
 end
+
+for i=1:numPoints
+  wtotal(i)=wsat(Tdew(i),press(i)*100.);
+end
+disp('wtotal');
+disp(wtotal);
+
 figHandle=figure(4);
 [figureHandle,outputws,handlews]=makeSkew(figHandle,skew);
 skewLimits=convertTempToSkew([5,30],1.e3,skew);
@@ -178,6 +208,13 @@ for i=1:numPoints
   [Temp(i),wv,wl]=tinvert_thetae(theThetae(i),wtotal(i),press(i)*100.);
   Tdew(i)=findTdwv(wv,press(i)*100.);
 end
+
+for i=1:numPoints
+  wtotal(i)=wsat(Tdew(i),press(i)*100.);
+end
+disp('wtotal');
+disp(wtotal);
+
 figHandle=figure(5);
 [figureHandle,outputws,handlews]=makeSkew(figHandle,skew);
 skewLimits=convertTempToSkew([5,30],1.e3,skew);
@@ -210,6 +247,11 @@ for i=1:numPoints
   [Temp(i),wv,wl]=tinvert_thetae(theThetae(i),wtotal(i),press(i)*100.);
   Tdew(i)=findTdwv(wv,press(i)*100.);
 end
+for i=1:numPoints
+  wtotal(i)=wsat(Tdew(i),press(i)*100.);
+end
+disp('wtotal');
+disp(wtotal);
 figHandle=figure(6);
 [figureHandle,outputws,handlews]=makeSkew(figHandle,skew);
 skewLimits=convertTempToSkew([5,30],1.e3,skew);
