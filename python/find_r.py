@@ -28,7 +28,7 @@ Av_no = 6.0221*10**23 #Avagadro's number
 Rv = 461.51
 
 #Given:
-r_a = .5*10**-7 #radius of aerosol in meters
+r_a = .2*10**-7 #radius of aerosol in meters
 v_a = (1.0*4/3)*np.pi*r_a**3 #volume of the aerosol partical in m**3
 rho_a = 1.77*10**3 #density of hydrated amonium sulfate in Kg/m**3
 m_a = v_a*rho_a #mass of the aerosol in Kg
@@ -45,12 +45,10 @@ T = 290 #surrounding temperature in Kelvin
 def rel_h_shift(rel_h_zero, r):
     v_d = (1.0*4/3)*np.pi*r**3 # volume of the spherical droplet
     rho_d = 1.0*(m_a + (v_d - v_a)*rho_w)/v_d #density of the droplet
-    m_d = rho_d*v_d # mass of the droplet
-    rho_dw = (v_d - v_a)*rho_w/v_d #density of water in droplet    
-    n_w = 1.0*Av_no*(v_d - v_a)*rho_w/M_w #number concentration of  water molecules in droplet    
-    exp_fac = 1.0*2*sigma_w/(rho_d*Rv*T*r)
-    fac1 = 1.0*(I*m_a*M_w)/(M_a*(m_d - m_a))
-    zero = - rel_h_zero + np.exp(exp_fac)*(1.0/(1 + fac1))    
+        
+    a = 1.0*2*sigma_w/(rho_d*Rv*T)
+    b = 1.0*(I*m_a*M_w)/((1.0*4/3)*np.pi*M_a*rho_d)
+    zero = - rel_h_zero + 1 + 1.0*a/r  - 1.0*b/(r)**3    
     return zero
 
 def rcrit_zero(r):    
@@ -100,9 +98,9 @@ b = brackets[1]
 c = brackets[2]
 
                 #try:
-                #r1 = optimize.zeros.brenth(r_find, a, b, rel_h_zero)
+                #r1 = optimize.zeros.brenth(r_find, a, b, .95)
                 #except
    
                 #try:
-                #r2 = optimize.zeros.brenth(r_find, b, c, rel_h_zero)
+                #r2 = optimize.zeros.brenth(r_find, b, c, .95)
                 #except
