@@ -3,21 +3,20 @@ import scipy.optimize as optimize
 import matplotlib.pyplot as plt
 import sys
 
-""""Purpose: 
+""""
+    Purpose: 
 
     To find the radius of a droplet nucleated by aerosol
     given a relative humidity value
 
     Steps:
 
-    plot relative humidity as calculated by the given function,
+    plot relative humidity as calculated by the given function: rel_h_shift()
     against radius
 
-    determine the brackets, since the function has two values within
-    a certain range
+    set up brackets centered on critical radius which is find using: find_r_crit(), r_crit_zero()    
 
     root find over both bracketed intervals
-
 """
 
 #Constants:
@@ -29,46 +28,58 @@ Av_no = 6.0221*10**23 #Avagadro's number
 Rv = 461.51
 
 #Given:
-r_a = 1*10**-8 #radius of aerosol in meters
+r_a = .5*10**-7 #radius of aerosol in meters
 v_a = (1.0*4/3)*np.pi*r_a**3 #volume of the aerosol partical in m**3
-rho_a = 1.77*10**3 #density of hydrated sodium sulfate in Kg/m**3
+rho_a = 1.77*10**3 #density of hydrated amonium sulfate in Kg/m**3
 m_a = v_a*rho_a #mass of the aerosol in Kg
+print 'mass of aerosol', m_a
 M_a = 140*10**-3 #molecular mass of the aerosol in Kg/mol
 I = 3 #distinct ions from aerosol
 T = 290 #surrounding temperature in Kelvin
 
+#radius range
+[a, b] = [1.1*r_a, 10**-6]
+
 """Constructing eq 6.8 from W&H"""
 
 def rel_h_shift(rel_h_zero, r):
-
     v_d = (1.0*4/3)*np.pi*r**3 # volume of the spherical droplet
     rho_d = 1.0*(m_a + (v_d - v_a)*rho_w)/v_d #density of the droplet
     m_d = rho_d*v_d # mass of the droplet
-    rho_dw = (v_d - v_a)*rho_w/v_d 
-    
-    n_w = 1.0*Av_no*(v_d - v_a)*rho_w/M_w #number concentration of  water molecules in droplet
-    
+    rho_dw = (v_d - v_a)*rho_w/v_d #density of water in droplet    
+    n_w = 1.0*Av_no*(v_d - v_a)*rho_w/M_w #number concentration of  water molecules in droplet    
     exp_fac = 1.0*2*sigma_w/(rho_d*Rv*T*r)
     fac1 = 1.0*(I*m_a*M_w)/(M_a*(m_d - m_a))
+    zero = - rel_h_zero + np.exp(exp_fac)*(1.0/(1 + fac1))    
+    return zero
 
-    zero = - rel_h_zero + np.exp(exp_fac)*(1.0/(1 + fac1))
-    
-    return [n_w, exp_fac, np.exp(exp_fac), (1.0/(1 + fac1))]
+def rcrit_zero(r):    
+    v_d = (1.0*4/3)*np.pi*r**3 # volume of the spherical droplet
+    rho_d = 1.0*(m_a + (v_d - v_a)*rho_w)/v_d #density of the droplet
+    m_d = rho_d*v_d # mass of the droplet
+    rho_dw = (v_d - v_a)*rho_w/v_d #density of water in droplet
+    a = 1.0*2*sigma_w/(rho_d*Rv*T)
+    b = 1.0*(I*m_a*M_w)/((1.0*4/3)*M_a*np.pi*rho_d)    
+    rcrit_zero = np.sqrt(3.0*b/a) - r
+    return rcrit_zero
 
 
-brackets = [1.2*10**-7]#list for brackets with first lower bracket
-delta = [1000] #list for slopes with dummy first element
-r_vals = np.linspace(1.2*10**-7, 10**-5, 1500)#array of radii
+def find_rcrit(a, b):
+    r_vals = np.linspace(a, b, 1000)#create an array of radius values
+    r_crit_rh = np.array([rel_h_shift(0, r) for r in r_vals])#calculate the relative humidities
+    index = np.where(r_crit_rh == np.max(r_crit_rh)) #get the index of the maximum value
+    a = r_vals[index]#get the corresponding radius, as an estimate to plug into the root finder
+    r_crit = optimize.zeros.newton(rcrit_zero, a)#root find
+    return r_crit
+
+"""
+   Calculate a range of relative humidity values over a range of radii
+"""
+r_vals = np.linspace(a, b, 1500)#array of radii
 rel_h_vals  = np.zeros(len(r_vals))#empty array for relative humidity values to be calculated
-
 for i in range(len(r_vals)):
-    print rel_h_shift(0, r_vals[i])  
-    rel_h_vals[i] = rel_h_shift(0, r_vals[i])[0]
-    #get slopes at each interval
-    delta.append(np.abs(1.0*(rel_h_vals[i] - rel_h_vals[i-1])/(r_vals[i]-r_vals[i-1])))
-   
-deltas = np.array(delta)
-
+    rel_h_vals[i] = rel_h_shift(0, r_vals[i])
+        
 """plot relative humidity against radius"""
 
 fig=plt.figure(1)
@@ -78,65 +89,11 @@ ax1.plot(r_vals, rel_h_vals)
 fig.canvas.draw()
 plt.show()
 
-""" 
-    Determine the brackets
 """
-
-#get minimum slope, return index.  
-min_delta = deltas.min
-print "min delta", min_delta
-index = np.where(deltas == min_delta) 
-print "index", index
-tol = .000000000000000000000001
-
-#Is this less than tol?
-
-#If so get max of the two corresponding relative humidity values and append this to the brackets list.   
-
-if np.absolute(min_delta) < tol:
-    if rel_h_val[index]>rel_h_val[index - 1]:
-        bracket.append(r_val[index])
-    else:
-        np.append,bracket(r_val[index])
-
-#If not
- 
-else:
-    if min_delta > 0: # if the minimum slope is > than zero, shorten the interval over which it's determined.
-        interval = [r_vals[index], 1.0*(r_vals[index] - r_vals[index-1])/2]  #new interval
-        count = 0 
-        max_iter = 1000
-        while count< max_iter:            
-            if np.abs(1.0*(rel_h_shift(interval[0]) - rel_h_shift(interval[1]))/(interval[0] - interval[1])) < tol:
-                break            
-            else:
-                if rel_h_shift(interval[0]) > rel_h_shift(interval[1]): #indirectly check direction of slope, and narrow interval accordingly
-                    interval[1] = 1.0*(interval[0] - interval[1])/2
-                else:
-                    interval[0] = 1.0*(interval[0] - interval[1])/2
-            count = count+1
-
-    #similarly if slope is negative, except bracket is shortened from the other end
-    else:
-         interval = [r_vals[index-1], 1.0*(r_vals[index] - r_vals[index-1])/2]   
-         count = 0 
-         max_iter = 1000
-         while count< max_iter:
-              if np.absolute(1.0*(rel_h_shift(interval[0]) - rel_h_shift(interval[1]))/(interval[0] - interval[1])) < tol:
-                  break
-            
-              else:
-                  if rel_h_shift(interval[0]) > rel_h_shift(interval[1]):
-                      interval[1] = 1.0*(interval[0] - interval[1])/2
-                  else:
-                      interval[0] = 1.0*(interval[0] - interval[1])/2
-
-              count = count+1
-            
-print "Maximum Iterations exceeded"
-brackets.append(max(interval))
-        
-brackets.append(10**-5)
+   Determine brackets centered around critical radius
+"""
+r_crit = find_rcrit(a, b)#determine critical radius
+brackets = [a, r_crit, b] #list for bracket ends
 
 a = brackets[0]
 b = brackets[1]
