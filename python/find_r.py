@@ -83,11 +83,9 @@ plt.show()
 """
 
 #get minimum slope, return index.  
-min_delta = deltas.min
-print "min delta", min_delta
-index = np.where(deltas == min_delta) 
+est_max_rh = rel_h_vals.max
+index = np.where(rel_h_vals == est_max_rh) 
 print "index", index
-tol = .000000000000000000000001
 
 #Is this less than tol?
 
