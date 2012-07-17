@@ -42,7 +42,7 @@ T = 290 #surrounding temperature in Kelvin
 
 """Constructing eq 6.8 from W&H"""
 
-def rel_h_shift(rel_h_zero, r):
+def rel_h_shift(r, rel_h_zero):
     v_d = (1.0*4/3)*np.pi*r**3 # volume of the spherical droplet
     rho_d = 1.0*(m_a + (v_d - v_a)*rho_w)/v_d #density of the droplet
         
@@ -64,7 +64,7 @@ def rcrit_zero(r):
 
 def find_rcrit(a, b):
     r_vals = np.linspace(a, b, 1000)#create an array of radius values
-    r_crit_rh = np.array([rel_h_shift(0, r) for r in r_vals])#calculate the relative humidities
+    r_crit_rh = np.array([rel_h_shift(r, 0) for r in r_vals])#calculate the relative humidities
     index = np.where(r_crit_rh == np.max(r_crit_rh)) #get the index of the maximum value
     a = r_vals[index]#get the corresponding radius, as an estimate to plug into the root finder
     r_crit = optimize.zeros.newton(rcrit_zero, a)#root find
@@ -76,7 +76,7 @@ def find_rcrit(a, b):
 r_vals = np.linspace(a, b, 1500)#array of radii
 rel_h_vals  = np.zeros(len(r_vals))#empty array for relative humidity values to be calculated
 for i in range(len(r_vals)):
-    rel_h_vals[i] = rel_h_shift(0, r_vals[i])
+    rel_h_vals[i] = rel_h_shift(r_vals[i], 0)
         
 """plot relative humidity against radius"""
 
@@ -84,23 +84,27 @@ fig=plt.figure(1)
 fig.clf()
 ax1=fig.add_subplot(111)
 ax1.plot(r_vals, rel_h_vals)
+plt.ylim(.9, 1.01)
 fig.canvas.draw()
 plt.show()
 
 """
    Determine brackets centered around critical radius
 """
-r_crit = find_rcrit(a, b)#determine critical radius
+r_crit = find_rcrit(a, b)[0]#determine critical radius
+print "Critical Radius", r_crit
 brackets = [a, r_crit, b] #list for bracket ends
 
 a = brackets[0]
 b = brackets[1]
 c = brackets[2]
+rh = float(raw_input("relative humidity?"))
+r1 = optimize.zeros.brenth(rel_h_shift, a, b, rh)
+print "root found radius in first bracket", r1
 
-                #try:
-                #r1 = optimize.zeros.brenth(r_find, a, b, .95)
-                #except
-   
-                #try:
-                #r2 = optimize.zeros.brenth(r_find, b, c, .95)
-                #except
+try:
+    r2 = optimize.zeros.brenth(rel_h_shift, b, c, rh)
+except ValueError:
+    print "only one radius for this relative humidity"
+else:        
+    print "root found radius in second bracket", r2
