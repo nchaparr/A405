@@ -16,7 +16,7 @@ import sys
 
     set up brackets centered on critical radius which is find using: find_r_crit(), r_crit_zero()    
 
-    root find over both bracketed intervals
+    root find over both bracketed intervals: do_r_find()
 """
 
 #Constants:
@@ -34,21 +34,19 @@ rho_a = 1.77*10**3 #density of hydrated amonium sulfate in Kg/m**3
 m_a = v_a*rho_a #mass of the aerosol in Kg
 print 'mass of aerosol', m_a
 M_a = 140*10**-3 #molecular mass of the aerosol in Kg/mol
-I = 3 #distinct ions from aerosol
-T = 290 #surrounding temperature in Kelvin
+I_no = 3 #distinct ions from aerosol
+TempK = 290 #surrounding temperature in Kelvin
 
 #radius range
-[a, b] = [1.1*r_a, 10**-6]
+[brackend_l, brackend_r] = [1.1*r_a, 10**-6]
 
-"""Constructing eq 6.8 from W&H"""
 
 def rel_h_shift(r, rel_h_zero):
     v_d = (1.0*4/3)*np.pi*r**3 # volume of the spherical droplet
     rho_d = 1.0*(m_a + (v_d - v_a)*rho_w)/v_d #density of the droplet
-        
-    a = 1.0*2*sigma_w/(rho_d*Rv*T)
-    b = 1.0*(I*m_a*M_w)/((1.0*4/3)*np.pi*M_a*rho_d)
-    zero = - rel_h_zero + 1 + 1.0*a/r  - 1.0*b/(r)**3    
+    a = 1.0*2*sigma_w/(rho_d*Rv*TempK)
+    b = 1.0*(I_no*m_a*M_w)/((1.0*4/3)*np.pi*M_a*rho_d)
+    zero = - rel_h_zero + 1 + 1.0*a/r  - 1.0*b/(r)**3#See excercise 6.12  W&H   
     return zero
 
 def rcrit_zero(r):    
@@ -56,9 +54,9 @@ def rcrit_zero(r):
     rho_d = 1.0*(m_a + (v_d - v_a)*rho_w)/v_d #density of the droplet
     m_d = rho_d*v_d # mass of the droplet
     rho_dw = (v_d - v_a)*rho_w/v_d #density of water in droplet
-    a = 1.0*2*sigma_w/(rho_d*Rv*T)
-    b = 1.0*(I*m_a*M_w)/((1.0*4/3)*M_a*np.pi*rho_d)    
-    rcrit_zero = np.sqrt(3.0*b/a) - r
+    a = 1.0*2*sigma_w/(rho_d*Rv*TempK)
+    b = 1.0*(I_no*m_a*M_w)/((1.0*4/3)*M_a*np.pi*rho_d)    
+    rcrit_zero = np.sqrt(3.0*b/a) - r #See excercise 6.12 in W&H
     return rcrit_zero
 
 
@@ -70,41 +68,45 @@ def find_rcrit(a, b):
     r_crit = optimize.zeros.newton(rcrit_zero, a)#root find
     return r_crit
 
-"""
-   Calculate a range of relative humidity values over a range of radii
-"""
-r_vals = np.linspace(a, b, 1500)#array of radii
-rel_h_vals  = np.zeros(len(r_vals))#empty array for relative humidity values to be calculated
-for i in range(len(r_vals)):
-    rel_h_vals[i] = rel_h_shift(r_vals[i], 0)
+def do_r_find(rh):
+    r_crit = find_rcrit(brackend_l, brackend_r)[0]#determine critical radius
+    print "Critical Radius", r_crit
+    brackets = [brackend_l, r_crit, brackend_r] #list for bracket ends
+
+    a = brackets[0]
+    b = brackets[1]
+    c = brackets[2]
+    r1 = optimize.zeros.brenth(rel_h_shift, a, b, rh)
+    print "root found radius in first bracket", r1
+
+    try:
+        r2 = optimize.zeros.brenth(rel_h_shift, b, c, rh)
+    except ValueError:
+        r2 = 0
+        print "only one radius for this relative humidity"
+    else:        
+        print "root found radius in second bracket", r2
         
-"""plot relative humidity against radius"""
+    return [r1, r2]
+    
+if __name__ == "__main__":
 
-fig=plt.figure(1)
-fig.clf()
-ax1=fig.add_subplot(111)
-ax1.plot(r_vals, rel_h_vals)
-plt.ylim(.9, 1.01)
-fig.canvas.draw()
-plt.show()
+    r_vals = np.linspace(brackend_l, brackend_r, 1500)#array of radii
+    rel_h_vals  = np.zeros(len(r_vals))#empty array for relative humidity values to be calculated
+    for i in range(len(r_vals)):
+        rel_h_vals[i] = rel_h_shift(r_vals[i], 0)
+        
 
-"""
-   Determine brackets centered around critical radius
-"""
-r_crit = find_rcrit(a, b)[0]#determine critical radius
-print "Critical Radius", r_crit
-brackets = [a, r_crit, b] #list for bracket ends
+    fig=plt.figure(1)
+    fig.clf()
+    ax1=fig.add_subplot(111)
+    ax1.plot(r_vals, rel_h_vals)
+    plt.ylim(.9, 1.01)
+    fig.canvas.draw()
+    plt.show()
 
-a = brackets[0]
-b = brackets[1]
-c = brackets[2]
-rh = float(raw_input("relative humidity?"))
-r1 = optimize.zeros.brenth(rel_h_shift, a, b, rh)
-print "root found radius in first bracket", r1
+    rh = float(raw_input('relative humidity'))
+    radii = do_r_find(rh)
+    
 
-try:
-    r2 = optimize.zeros.brenth(rel_h_shift, b, c, rh)
-except ValueError:
-    print "only one radius for this relative humidity"
-else:        
-    print "root found radius in second bracket", r2
+
