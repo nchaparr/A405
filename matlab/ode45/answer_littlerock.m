@@ -1,7 +1,8 @@
 function answer_littlerock
     filename='littlerock.nc';
     fprintf('reading file: %s\n',filename);
-    file_struct=nc_info(filename);
+    file_struct=nc_info(filename);%get error message "Undefined
+                                  %function or method nc_info"
     c=constants;
     %
     % grab the March 2 12Z sounding
@@ -12,21 +13,41 @@ function answer_littlerock
     height=nc_varget(filename,sound_var,[0,1],[Inf,1]);
     temp=nc_varget(filename,sound_var,[0,2],[Inf,1]);
     dewpoint=nc_varget(filename,sound_var,[0,3],[Inf,1]);
-    newHeight=nudgeHeight(height);
-    interpTenv=@(zVals) interp1(newHeight,temp,zVals);
+    newHeight=nudgeHeight(height);  %adds tiny difference to one of
+                                    %two equal (subsequent?) heights
+    interpTenv=@(zVals) interp1(newHeight,temp,zVals);%setting up
+                                                      %interpolation
+                                                      %functions
+                                                      %for
+                                                      %environmental
+                                                      %temperature,
+                                                      %pressure and
+                                                      %environmental
+                                                      %dewpoint
+                                                      %(gives Wt)
     interpTdEnv=@(zVals) interp1(newHeight,dewpoint,zVals);
     interpPress=@(zVals) interp1(newHeight,press,zVals);
     p900_level=find(abs(900 - press) < 2.);
     p800_level=find(abs(800 - press) < 7.);
-    thetaeVal=thetaep(dewpoint(p900_level) + c.Tc,temp(p900_level) + c.Tc,press(p900_level)*100.);
-    height_800=height(p800_level)
+    thetaeVal=thetaep(dewpoint(p900_level) + c.Tc, temp(p900_level) ...
+                      + c.Tc,press(p900_level)*100.);% calculating
+                                                     % the
+                                                     % equivalent
+                                                     % potential temperature
+    height_800 = height(p800_level);
     yinit=[0.5,height_800];
     tspan=0:10:2500;
     derivs=@(t,y) F(t,y,thetaeVal,interpTenv,interpTdEnv,interpPress);
-
+    % a function which returns the bouyancy (is this vertical
+    % accelleration?)
+    % at y(2) as the first
+    % element and tge height y(1) as the second element. 
     stopPress=200;
     options=odeset('Events',@stopIt);
-    [t,y]=ode45(derivs,tspan,yinit,options);
+    [t,y]=ode45(derivs,tspan,yinit,options);%I think this is
+                                            %solving for the
+                                            %velocity at time(s) t
+                                            %given the acceleration (buoyancy) 
     wvel=y(:,1);
     height=y(:,2); 
     [height,wvel]
