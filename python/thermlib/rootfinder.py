@@ -39,11 +39,14 @@ def get_y(x, f, eps, ymax, ymin, *args):
 
 def fzero(the_func, root_bracket, *args, **parms):
     # the_func is the function we wish to find the zeros of
-    # root_bracket is an initial guess of the zero location.
-    #   Can be a float or a sequence of two floats specifying a range
+    # root_bracket is an initial guess of the zero location 
+    # root_bracket must be a sequence of two floats specifying a range 
+    #(the_func must differ in sign when evaluated at these points)
+    # Note: brenth() seems to require a bracketing interval, 
+    # so a single float can't be passed to fzero, as in MATLAB.
     # *args contains any other parameters needed for f
-    # **parms can be eps (allowable error) or maxiter (max number of iterations.)
-    answer=optimize.zeros.brenth(the_func,263,315,args=(e_target))
+    # **parms can be xtol (allowable error) or maxiter (max number of iterations.)
+    answer=optimize.zeros.brenth(the_func, root_bracket[0], root_bracket[1], *args, **parms)
     return answer
     
 def testfunc(x):
@@ -52,6 +55,6 @@ def testfunc(x):
  
 if __name__=="__main__":
     f = testfunc
-    x = 1.
+    x = [-1,1]
     print fzero(f, x)
-    print fzero(f, x, eps=1e-300, maxiter = 80.)
+    print fzero(f, x, xtol=1.e-300, maxiter=80)

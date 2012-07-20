@@ -41,7 +41,7 @@ def tinvert_thetae(thetaeVal, wT, p):
     # The temperature has to be somewhere between thetae
     # (T at surface) and -40 deg. C (no ice).    
     handle = Tchange
-    theTemp = scipy.optimize.zeros.brenth(handle, 233.15, \
+    theTemp = scipy.optimize.zeros.brenth(handle, 50, \
                                       thetaeVal, (thetaeVal, wT, p));
     [wv,wl] = findWvWl(theTemp, wT, p);
     return theTemp,wv,wl

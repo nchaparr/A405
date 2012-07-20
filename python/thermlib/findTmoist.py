@@ -28,12 +28,15 @@ def findTmoist(thetaE0, press):
     >>> findTmoist(300., 8.e4)
     270.59590841970277
     
+    >>> findTmoist(330., 800)
+    83.1818
+    
     """
 
     # First determine if press can be indexed
     try: len(press)
     except: #press is a single value
-        Temp = optimize.zeros.brenth(thetaEchange, 200, 400, \
+        Temp = optimize.zeros.brenth(thetaEchange, 50, 400, \
                                         (thetaE0, press));
     else: #press is a vector           
         Temp = []
@@ -41,7 +44,7 @@ def findTmoist(thetaE0, press):
         for i in press:            
             # This assumes that the dewpoint is somewhere between 
             # 250K and 350K.
-            Temp.append(optimize.zeros.brenth(thetaEchange, 200, \
+            Temp.append(optimize.zeros.brenth(thetaEchange, 50, \
                                                  400, (thetaE0, i)));
             #{'in Tmoist: ',i, result(i)}  
         
@@ -72,7 +75,7 @@ def thetaEchange(Tguess, thetaE0, press):
         
     """
     thetaEguess = thetaes(Tguess, press);
-    #{'in change: ',Tguess,press,thetaEguess,thetaE0}
+    
     #when this result is small enough we're done
     theDiff = thetaEguess - thetaE0;
     return theDiff
