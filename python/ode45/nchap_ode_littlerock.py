@@ -43,17 +43,18 @@ def ode_littlerock():
     interpTdEnv = lambda zVals: np.interp(zVals, newHeight, dewpoint)
     interpPress = lambda zVals: np.interp(zVals, newHeight, press)
     interpRelH = lambda zVals: np.interp(zVals, newHeight, RelH)
+    p880_level = np.where(abs(880 - press) < 2.)
     p900_level = np.where(abs(900 - press) < 2.)
-    p800_level = np.where(abs(800 - press) < 7.)
 
-    thetaeVal=thetaep(dewpoint[p900_level] + c.Tc,temp[p900_level] + c.Tc, press[p900_level]*100.)
+    thetaeVal=thetaep(dewpoint[p880_level] + c.Tc,temp[p880_level] + c.Tc, press[p880_level]*100.)
     
-    height_800=height[p800_level]
     height_900=height[p900_level]
+    height_880=height[p880_level]
+    print 'initial height',height_900
 
-    press0 = interpPress(height_800)*100
+    press0 = interpPress(height_900)*100
     Tparc0 = findTmoist(thetaeVal, press0)[0]
-    RelH0 = interpRelH(height_900)[0]
+    RelH0 = interpRelH(height_880)[0]
 
     Ws0 = wsat(Tparc0, press0)[0]
     Wt0 = 1.0*RelH0*Ws0/100
@@ -61,10 +62,9 @@ def ode_littlerock():
     #get initial radius
     r0 = do_r_find(RelH0/100)[0]
     
-    print 'Initial Relative humidity, Wsat and Wt of parcel, initial radius', RelH0, Ws0, Wt0, r0   
-    
+    print 'Initial Relative humidity, Wsat and Wt of parcel, initial radius', RelH0, Ws0, Wt0, r0       
 
-    yinit = [height_800, 0.5, Tparc0, Tparc0, Tparc0, r0]  #(intial velocity = 0.5 m/s, initial height in m)
+    yinit = [height_900, 0.5, Tparc0, Tparc0, Tparc0, r0]  #(intial velocity = 0.5 m/s, initial height in m)
     tinit = 0
     tfin = 2500
     dt = 10
@@ -105,16 +105,19 @@ def ode_littlerock():
     radius = y[:,5]
     
     fig = plt.figure(1)
-    ax1=fig.add_subplot(131)
-    ax1.plot(wvel, height, 'o')
-    plt.xlabel('vertical velocity')
-    plt.ylabel('height above surface (m)')
-    ax2=fig.add_subplot(132)
-    plt.plot(Tparc, height, 'o', label = '1')
-    ax3=fig.add_subplot(133)
-    plt.plot(radius, height, 'o', label = '1')
-    plt.legend(loc = 'lower left')
-    plt.xlabel('temperature profiles')
+    #ax1=fig.add_subplot(121)
+    #ax1.plot(wvel, height, 'o')
+    #plt.xlabel('vertical velocity')
+    #plt.ylabel('height above surface (m)')
+    #ax2=fig.add_subplot(121)
+    #plt.plot(Tparc, height, 'o', label = '1')
+    ax3=fig.add_subplot(111)
+    plt.plot(radius, height, 'o')
+    labels = ax3.get_xticklabels()
+    for label in labels:
+        label.set_rotation(30) 
+    #plt.legend(loc = 'lower left')
+    plt.xlabel('radius profile')
     plt.show()
         
 #F returns the buoyancy (and height)at a given time step and height
