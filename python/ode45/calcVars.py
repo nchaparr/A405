@@ -59,11 +59,32 @@ def calcdWdT(tempK, pressPa):
     out= (thewsat[0]  + 1.0*thewsat[0]**2/c.eps)*deriv
     return out
 
-def calcdr():    
-    a = 1.0*2*sigma_w/(rho_d*c.Rv*Tparc)
+def calcdr(rad, Tparc, height, interpPress, rho_a, r_a, M_a, I_no):
+    rho_d = 1000 #can i assume this?
+    Rg = 8.3143
+    Md = 28.97
+    rho_l =  1000 #can i assume this?
+    sigma_w = .076
+    M_w = 18
+
+    v_a = (1.0*4/3)*np.pi*r_a**3 #volume of the aerosol partical in m**3
+    m_a = v_a*rho_a #mass of the aerosol in Kg
+       
+    a = 1.0*2*sigma_w/(rho_d*c.Rv*Tparc)#W&H ex6.12
     b = 1.0*(I_no*m_a*M_w)/((1.0*4/3)*np.pi*M_a*rho_d) 
-    esat = 
-    e_drop = esat*(1 + 1.*a/r  - 1.0*b/r**3)
     
+    e_s = esat(Tparc)
+    
+    e_drop = e_s*(1 + 1.*a/rad  - 1.0*b/rad**3)#W&H ex6.12
+
+    Press=interpPress(height)*100
+    
+    Ws = wsat(Tparc, Press)
+    
+    Pressv = 1.0*(Ws/(Ws + c.eps))*Press
+
+    Dv = 1000.0*2.21*10**-5/Press#Curry&Webster p144 
+    dr = (1.0/rad)*(1.0*Dv/(rho_l*c.Rv*Tparc))*(Pressv - e_drop)
+    return dr
     
     
