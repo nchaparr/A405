@@ -2,7 +2,6 @@ from netCDF4 import Dataset
 import site
 site.addsitedir('/nfs/kite/home/nchaparr/A405/repos/a405repo/python//thermlib')
 site.addsitedir('/nfs/kite/home/nchaparr/A405/repos/a405repo/python//skew_T')
-site.addsitedir('/nfs/kite/home/nchaparr/A405/repos/a405repo/python//ode45')
 from scipy.integrate import ode
 import matplotlib.pyplot as plt
 import numpy as np
@@ -15,8 +14,10 @@ from new_thermo import thetaep
 from calcVars import calcBuoy
 from findTmoist import findTmoist
 from wsat import wsat
-from calcVars import calcdT 
+from calcVars import calcdT
+from calcVars import calcdr
 from findWvWl import findWvWl
+from find_r import * 
     
 def ode_littlerock():
     filename = 'littlerock.nc'
@@ -51,16 +52,19 @@ def ode_littlerock():
     height_900=height[p900_level]
 
     press0 = interpPress(height_800)*100
-    Tcloud0 = findTmoist(thetaeVal, press0)[0]
+    Tparc0 = findTmoist(thetaeVal, press0)[0]
     RelH0 = interpRelH(height_900)[0]
 
-    Ws0 = wsat(Tcloud0, press0)[0]
+    Ws0 = wsat(Tparc0, press0)[0]
     Wt0 = 1.0*RelH0*Ws0/100
 
-    print 'Initial Relative humidity, Wsat and Wt of parcel', RelH0, Ws0, Wt0   #get initial radius
+    #get initial radius
+    r0 = do_r_find(RelH0/100)[0]
+    
+    print 'Initial Relative humidity, Wsat and Wt of parcel, initial radius', RelH0, Ws0, Wt0, r0   
     
 
-    yinit = [height_800, 0.5, Tcloud0, Tcloud0, Tcloud0]  #(intial velocity = 0.5 m/s, initial height in m)
+    yinit = [height_800, 0.5, Tparc0, Tparc0, Tparc0, r0]  #(intial velocity = 0.5 m/s, initial height in m)
     tinit = 0
     tfin = 2500
     dt = 10
@@ -94,30 +98,32 @@ def ode_littlerock():
         print "thetae test: ", thetaep(Td, T, P), thetaeVal[0]
         
     wvel = y[:,1]
-    Tcloud = y[:,2]
+    Tparc = y[:,2]
     height = y[:,0]
     Tcheck = y[:,3]
     Tcheck1 = y[:,4]
-        
+    radius = y[:,5]
+    
     fig = plt.figure(1)
-    ax1=fig.add_subplot(121)
+    ax1=fig.add_subplot(131)
     ax1.plot(wvel, height, 'o')
     plt.xlabel('vertical velocity')
     plt.ylabel('height above surface (m)')
-    ax2=fig.add_subplot(122)
-    plt.plot(Tcloud, height, 'o', label = '1')
-    plt.plot(Tcheck, height, '+', label = '2')
-    #plt.plot(Tcheck1, height, 'o', label = '3')
+    ax2=fig.add_subplot(132)
+    plt.plot(Tparc, height, 'o', label = '1')
+    ax3=fig.add_subplot(133)
+    plt.plot(radius, height, 'o', label = '1')
     plt.legend(loc = 'lower left')
     plt.xlabel('temperature profiles')
     plt.show()
         
 #F returns the buoyancy (and height)at a given time step and height
 def F(t, y, Wt0, thetae0, interpTenv, interpTdEnv, interpPress):
-    yp = np.zeros((5,1))
+    yp = np.zeros((6,1))
     yp[0] = y[1]
     yp[1] = calcBuoy(y[0], Wt0, thetae0, interpTenv, interpTdEnv, interpPress)
     yp[2], yp[3], yp[4] = calcdT(y[0], Wt0, interpPress, thetae0, y[1])
+    yp[5] = calcdr(y[5], y[2], y[0], interpPress, 1.77*10**3, .2*10**-7, 140*10**-3, 3)
     return yp
 
 if __name__ == "__main__":
