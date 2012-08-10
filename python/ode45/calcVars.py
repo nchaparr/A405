@@ -6,8 +6,9 @@ from findTmoist import findTmoist
 from wsat import wsat
 from findWvWl import findWvWl
 from esat import *
+from T_thetaep import t_thetaep
 
-def calcBuoy(height, Wt0, thetae0, interpTenv, interpTdEnv, interpPress):
+def calcBuoy(height, Wt, Tparc, thetae0, interpTenv, interpTdEnv, interpPress):
 
     #input: height (m), thetae0 (K), plus function handles for
     #T,Td, press soundings
@@ -15,8 +16,8 @@ def calcBuoy(height, Wt0, thetae0, interpTenv, interpTdEnv, interpPress):
     #neglect liquid water loading in the virtual temperature
     
     Press=interpPress(height)*100 #Pa
-    Tparc=findTmoist(thetae0,Press) #K
-    wvparc= findWvWl(Tparc, Wt0, Press)[0]; #kg/kg
+    #Tparc=t_thetaep(thetae0, Wt, Press) #K
+    wvparc= findWvWl(Tparc, Wt, Press)[0]; #kg/kg
     Tvparc=Tparc*(1. + c.eps*wvparc)
     Tenv=interpTenv(height) + c.Tc
     Tdenv=interpTdEnv(height) + c.Tc
@@ -26,13 +27,13 @@ def calcBuoy(height, Wt0, thetae0, interpTenv, interpTdEnv, interpPress):
     dW = c.g0*(TvDiff/Tvenv)    
     return dW 
 
-def calcdT(height, Wt0, interpPress, thetae0, Wvel):
+def calcdT(height, Wt, Tparc, interpPress, thetae0, Wvel):
     Press=interpPress(height)*100.
-    Tparc=findTmoist(thetae0,Press)
-    wvparc=findWvWl(Tparc, Wt0, Press)[0]
-    wl = Wt0 - wvparc
+    #Tparc=findTmoist(thetae0, Press)
+    wvparc=findWvWl(Tparc, Wt, Press)[0]
+    wl = Wt - wvparc
     Tvparc=Tparc*(1. + c.eps*wvparc)
-    rho= 1.0*Press/(c.Rd*Tvparc)
+    rho = 1.0*Press/(c.Rd*Tvparc)
     Ws = wsat(Tparc, Press)#assumed saturated?
 
     rho= 1.0*Press/(c.Rd*Tvparc) #density of the cloud
@@ -43,7 +44,7 @@ def calcdT(height, Wt0, interpPress, thetae0, Wvel):
     
     dT = (1.0*c.Rd*Tparc/(c.cpd*Press))*Wvel*(-c.g0*rho)*(1.0/(1 - (c.lv0*Ws)/(c.cpd*Tparc) + (1.0*c.lv0/c.cpd)*dWs))
 
-    a = 1.0*(1+Wt0)/(1+wvparc*(1.0*c.cpv/c.cpd))
+    a = 1.0*(1+Wt)/(1+wvparc*(1.0*c.cpv/c.cpd))
     b = 1+1.0*c.lv0/(c.Rd*Tparc)
     C = 1.0*wl*c.cl/(c.cpd+wvparc*c.cpv)
     d = 1.0*c.lv0**2*wvparc*(1 + 1.0*wvparc/c.eps)/(c.Rv*Tparc**2*(c.cpd + wvparc*c.cpv))
