@@ -32,6 +32,7 @@ def Tdfind(wv, p):
     
     """
     c = constants();    
+
     e = wv * p / (c.eps + wv);
     denom = (17.67 / np.log(e / 611.2)) - 1.;
     Td = 243.5 / denom;
@@ -45,4 +46,4 @@ def _test():
 
 if __name__ == "__main__":
     _test()
-o
+
