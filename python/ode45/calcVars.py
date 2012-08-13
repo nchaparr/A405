@@ -51,6 +51,7 @@ def calcdT(height, Wt, Tparc, interpPress, thetae0, Wvel):
 
     check1dT = -1.0*(1.0*c.g0*Wvel/c.cpd)*a*b/(1+C+d)
     checkdT = -1.0*(c.g0*Wvel)/(c.cpd + c.lv0*dWs)
+    #print Ws, dT
     return dT, checkdT, check1dT
 
 def calcdWdT(tempK, pressPa):
