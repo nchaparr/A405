@@ -1,7 +1,7 @@
 import scipy.optimize
 
 from findWvWl import findWvWl
-from new_thermo import thetaep
+from my_thetaep import thetaep
 from Tdfind import Tdfind
 
 def t_thetaep(thetaepVal, wT, p):
@@ -28,7 +28,6 @@ def Tchange(Tguess, thetaepVal, wT, p):
     # default tolerance in brenth.
     Td = Tdfind(wv, p)
     return thetaepVal - thetaep(Td, Tguess, p);
-
 
 def _test():
     #import doctest
