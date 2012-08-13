@@ -10,7 +10,7 @@ import numpy as np
 
 from constants import constants as c
 from nudge import nudge
-from new_thermo import thetaep
+from my_thetaep import thetaep
 from calcVars import calcBuoy
 from T_thetaep import t_thetaep
 from wsat import wsat
@@ -25,9 +25,9 @@ def ode_littlerock():
     print 'reading file: %s\n' %(filename)
     nc_file = Dataset(filename)
     var_names = nc_file.variables.keys()
-    print nc_file.ncattrs()
-    print nc_file.units
-    print nc_file.col_names
+    #print nc_file.ncattrs()
+    #print nc_file.units
+    #print nc_file.col_names
     
     sound_var = nc_file.variables[var_names[3]]
     press = sound_var[:,0]
@@ -47,38 +47,34 @@ def ode_littlerock():
     p880_level = np.where(abs(880 - press) < 2.)
     p900_level = np.where(abs(900 - press) < 2.)
 
-    #properties of the parcel
-    Td = dewpoint[p880_level]
-    Tdc = dewpoint[p880_level] + c.Tc
-    Tinit = temp[p880_level] + 4 + c.Tc
+    #properties of the parcel - to be cleaned up!
+    Td = dewpoint[p880_level] + 2.4
+    Tdc = Td + c.Tc
+    Tinit = temp[p880_level] + 2.7 + c.Tc
     Pinit = press[p880_level]*100.
-    print 'Tinit, Pinit', Tinit, Pinit
-    
     es = esat(Tinit)
     einit = np.exp((Td*17.67)/(243.5 + Td))*611.2 #see Tdfind
-    print 'relative humidity:', einit/es  
     ws = wsat(Tinit[0], Pinit[0])
     Wt = einit/es*ws #see W&H eq 3.64.  Assuming all water is in vapor phase
     
     height_900=height[p900_level]
     height_880=height[p880_level]    
-    print 'initial height', height_900
-    
+        
     press0 = interpPress([885])*100
-    thetaeVal=thetaep(Tdc, Tinit, press0)
-    print 'initial pressure, thetaeVal', press0, thetaeVal, Wt
+    thetaeVal = thetaep(Tdc, Tinit, press0)
     Tparc0 = t_thetaep(thetaeVal[0], Wt[0], press0[0])[0]
-    print 'starting temperature of parcel', Tparc0
     #is it saturated?
     ws0 = wsat(Tparc0, press0)
-    print 'lifting level wsat and wtot of parcel', ws0, Wt
     RelH0 = (100*Wt/ws0)[0] 
-    print 'Relative Humidity', RelH0 
-  
+
+    print 'Initial Temperature, thetaeVal', Tparc0, thetaeVal
+    print 'Initial Relative humidity, Wsat, Wt', RelH0, ws0, Wt
+      
     #get initial radius
     r0 = do_r_find(1.0*RelH0/100)[0]
     
-    print 'Initial Relative humidity, Wsat and Wt of parcel, initial radius', RelH0, ws0, Wt, r0       
+   
+    print 'Initial radius', r0       
 
     yinit = [885, 0.5, Tparc0, Tparc0, Tparc0, r0]  #(intial velocity = 0.5 m/s, initial height in m)
     tinit = 0
@@ -107,13 +103,16 @@ def ode_littlerock():
         T = r.y[2]
         wv = findWvWl(T, Wt[0], P)[0]
         ws = wsat(T, P)
-        e = 1.0*wv*P/(c.eps + wv)
+        #print Wt, ws
+        if Wt[0]> ws - .000005 and Wt[0] < ws + .000005:
+            print 'becomes saturated at:' , r.y[0], 'meters'
+        e = 1.0*wv*P/(c.eps + wv) # see Tdfind
         denom=(1.0*17.67/np.log(e/611.2)) - 1.
         T_d = 1.0*243.5/denom
         T_dc = T_d + 273.15
                 
-        print "test, Tds, thetaeps, ws, wv, wtot: ", T_d, T_dc, thetaep(T_dc, T, P), thetaeVal[0], ws, wv, Wt
-        
+        print "test thetaep: ", thetaep(T_dc, T, P), thetaeVal[0]
+    
     wvel = y[:,1]
     Tparc = y[:,2]
     height = y[:,0]
