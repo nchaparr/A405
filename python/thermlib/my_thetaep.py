@@ -159,7 +159,7 @@ def wsat(Temp, press):
         theWs=theWs[0]
     return theWs
 
-def thetaep(Td, T, p):
+def thetaep(wv, T, p):
     """
     thetaep(Td, T, p)
 
@@ -183,15 +183,6 @@ def thetaep(Td, T, p):
         Pseudo equivalent potential temperature (K).
 
     """
-    if Td < T:
-        #parcel is unsaturated
-        [Tlcl, plcl] = LCLfind(Td, T, p);
-        wv = wsat(Td, p);
-    else:
-        #parcel is saturated -- prohibit supersaturation with Td > T
-        Tlcl = T;
-        wv = wsat(T, p);
-        
     Pd = 1.0*(c.eps/(wv+c.eps))*p
     thetaval = T*(c.p0/Pd)**(c.Rd/c.cpd)    
     ws = wsat(T, p)
