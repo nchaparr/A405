@@ -1,12 +1,15 @@
 from netCDF4 import Dataset
 import site
+import sys
 site.addsitedir('/nfs/kite/home/nchaparr/A405/repos/a405repo/python//thermlib')
 site.addsitedir('/nfs/kite/home/nchaparr/A405/repos/a405repo/python//skew_T')
 from scipy.integrate import ode
 import matplotlib.pyplot as plt
 import numpy as np
 
-""" """
+""" 
+
+"""
 
 from constants import constants as c
 from nudge import nudge
@@ -18,7 +21,7 @@ from calcVars import calcdT
 from calcVars import calcdr
 from findWvWl import findWvWl
 from find_r import *
-from esat import esat 
+from esat import esat
     
 def ode_littlerock():
     filename = 'littlerock.nc'
@@ -47,43 +50,39 @@ def ode_littlerock():
     p880_level = np.where(abs(880 - press) < 2.)
     p900_level = np.where(abs(900 - press) < 2.)
 
-    #properties of the parcel - to be cleaned up!
-    Td = dewpoint[p880_level] + 2.4
-    Tdc = Td + c.Tc
-    Tinit = temp[p880_level] + 2.7 + c.Tc
-    Pinit = press[p880_level]*100.
-    es = esat(Tinit)
-    einit = np.exp((Td*17.67)/(243.5 + Td))*611.2 #see Tdfind
-    ws = wsat(Tinit[0], Pinit[0])
-    Wt = einit/es*ws #see W&H eq 3.64.  Assuming all water is in vapor phase
-    
-    height_900=height[p900_level]
-    height_880=height[p880_level]    
-        
-    press0 = interpPress([885])*100
-    thetaeVal = thetaep(Tdc, Tinit, press0)
-    Tparc0 = t_thetaep(thetaeVal[0], Wt[0], press0[0])[0]
-    #is it saturated?
-    ws0 = wsat(Tparc0, press0)
-    RelH0 = (100*Wt/ws0)[0] 
+    height0 = 885    
 
+    #Setting initial properties of parcel
+    press0 = interpPress(height0)*100
+    Tparc0 = 290
+    Wt = .012
+    ws0 = wsat(Tparc0, press0)
+    RelH0 = (100*Wt/ws0)
+
+    #if saturated, stop
+    
+    if ws0 <= Wt:
+        sys.exit('Saturated.  Change Wt.')       
+    else:
+        wv0 = Wt
+        
+    thetaeVal = thetaep(wv0, Tparc0, press0)
+        
     print 'Initial Temperature, thetaeVal', Tparc0, thetaeVal
     print 'Initial Relative humidity, Wsat, Wt', RelH0, ws0, Wt
       
     #get initial radius
     r0 = do_r_find(1.0*RelH0/100)[0]
-    
-   
     print 'Initial radius', r0       
 
-    yinit = [885, 0.5, Tparc0, Tparc0, Tparc0, r0]  #(intial velocity = 0.5 m/s, initial height in m)
+    yinit = [height0, 0.5, Tparc0, Tparc0, Tparc0, r0]  #(intial velocity = 0.5 m/s, initial height in m)
     tinit = 0
-    tfin = 100
-    dt = .01
+    tfin = 300
+    dt = 1
     
     #want to integrate F using ode45 (from MATLAB) equivalent integrator
     r = ode(F).set_integrator('dopri5')
-    r.set_f_params(Wt, thetaeVal, interpTenv, interpTdEnv, interpPress)
+    r.set_f_params(Wt, interpTenv, interpTdEnv, interpPress)
     r.set_initial_value(yinit, tinit)
     
     y = np.array(yinit)
@@ -91,27 +90,27 @@ def ode_littlerock():
     
     #stop integration when the parcel changes direction, or time runs out
     while r.successful() and r.t < tfin and r.y[1] > 0:
+
         #find y at the next time step
         #(r.integrate(t) updates the fields r.y and r.t so that r.y = F(t) and r.t = t 
         #where F is the function being integrated)
         r.integrate(r.t+dt)
+
         #keep track of y at each time step
         y = np.vstack((y, r.y))
         t = np.vstack((t, r.t))
         P = interpPress(r.y[0])*100
 
+        #test for thetaep and point at which parcel becomes saturated
+        
         T = r.y[2]
-        wv = findWvWl(T, Wt[0], P)[0]
+        [wv, wl] = findWvWl(T, Wt, P)
         ws = wsat(T, P)
-        #print Wt, ws
-        if Wt[0]> ws - .000005 and Wt[0] < ws + .000005:
-            print 'becomes saturated at:' , r.y[0], 'meters'
-        e = 1.0*wv*P/(c.eps + wv) # see Tdfind
-        denom=(1.0*17.67/np.log(e/611.2)) - 1.
-        T_d = 1.0*243.5/denom
-        T_dc = T_d + 273.15
-                
-        print "test thetaep: ", thetaep(T_dc, T, P), thetaeVal[0]
+       
+        if Wt > ws - .0000007 and Wt < ws + .0000007:
+            print 'becomes saturated at around:' , r.y[0], 'meters'
+                            
+        #print "thetaep test: ", thetaep(wv, T, P), thetaeVal
     
     wvel = y[:,1]
     Tparc = y[:,2]
@@ -126,7 +125,9 @@ def ode_littlerock():
     #plt.xlabel('vertical velocity')
     #plt.ylabel('height above surface (m)')
     ax2=fig.add_subplot(121)
-    plt.plot(Tparc, height, '*')
+    plt.plot(Tparc, height, 'k *')
+    plt.plot(Tcheck, height, 'b o')
+    #plt.plot(Tcheck1, height, 'r +')
     labels = ax2.get_xticklabels()
     for label in labels:
         label.set_rotation(30)
@@ -140,11 +141,11 @@ def ode_littlerock():
     plt.show()
         
 #F returns the buoyancy (and height)at a given time step and height
-def F(t, y, Wt, thetae0, interpTenv, interpTdEnv, interpPress):
+def F(t, y, Wt, interpTenv, interpTdEnv, interpPress):
     yp = np.zeros((6,1))
     yp[0] = y[1]
-    yp[1] = calcBuoy(y[0], Wt[0], y[2], thetae0, interpTenv, interpTdEnv, interpPress)
-    yp[2], yp[3], yp[4] = calcdT(y[0], Wt[0], y[2], interpPress, thetae0, y[1])
+    yp[1] = calcBuoy(y[0], Wt, y[2], interpTenv, interpTdEnv, interpPress)
+    yp[2], yp[3], yp[4] = calcdT(y[0], Wt, y[2], interpPress, y[1])
     yp[5] = calcdr(y[5], y[2], y[0], interpPress, 1.77*10**3, .2*10**-7, 140*10**-3, 3)
     return yp
 
