@@ -55,8 +55,9 @@ def ode_littlerock():
     #Setting initial properties of parcel
     press0 = interpPress(height0)*100
     Tparc0 = 290
-    Wt = .012
+    Wt = .013
     ws0 = wsat(Tparc0, press0)
+    pressv0 = 1.0*(ws0/(ws0 + c.eps))*press0
     RelH0 = (100*Wt/ws0)
 
     #if saturated, stop
@@ -75,10 +76,10 @@ def ode_littlerock():
     r0 = do_r_find(1.0*RelH0/100)[0]
     print 'Initial radius', r0       
 
-    yinit = [height0, 0.5, Tparc0, Tparc0, Tparc0, r0]  #(intial velocity = 0.5 m/s, initial height in m)
+    yinit = [height0, 0.5, Tparc0, Tparc0, Tparc0, r0, pressv0]  #(intial velocity = 0.5 m/s, initial height in m)
     tinit = 0
-    tfin = 300
-    dt = 1
+    tfin = 100
+    dt = .1
     
     #want to integrate F using ode45 (from MATLAB) equivalent integrator
     r = ode(F).set_integrator('dopri5')
@@ -106,17 +107,19 @@ def ode_littlerock():
         T = r.y[2]
         [wv, wl] = findWvWl(T, Wt, P)
         ws = wsat(T, P)
+        
        
-        if Wt > ws - .0000007 and Wt < ws + .0000007:
+        if Wt > ws - .000001 and Wt < ws + .000001:
             print 'becomes saturated at around:' , r.y[0], 'meters'
                             
-        #print "thetaep test: ", thetaep(wv, T, P), thetaeVal
+        print "thetaep test: ", thetaep(wv, T, P), thetaeVal
     
     wvel = y[:,1]
     Tparc = y[:,2]
     height = y[:,0]
     Tcheck = y[:,3]
     Tcheck1 = y[:,4]
+    pressv = y[:,6]
     radius = y[:,5]
     
     fig = plt.figure(1)
@@ -125,8 +128,8 @@ def ode_littlerock():
     #plt.xlabel('vertical velocity')
     #plt.ylabel('height above surface (m)')
     ax2=fig.add_subplot(121)
-    plt.plot(Tparc, height, 'k *')
-    plt.plot(Tcheck, height, 'b o')
+    plt.plot(pressv, height, 'k *')
+    #plt.plot(Tcheck, height, 'b o')
     #plt.plot(Tcheck1, height, 'r +')
     labels = ax2.get_xticklabels()
     for label in labels:
@@ -142,11 +145,11 @@ def ode_littlerock():
         
 #F returns the buoyancy (and height)at a given time step and height
 def F(t, y, Wt, interpTenv, interpTdEnv, interpPress):
-    yp = np.zeros((6,1))
+    yp = np.zeros((7,1))
     yp[0] = y[1]
     yp[1] = calcBuoy(y[0], Wt, y[2], interpTenv, interpTdEnv, interpPress)
     yp[2], yp[3], yp[4] = calcdT(y[0], Wt, y[2], interpPress, y[1])
-    yp[5] = calcdr(y[5], y[2], y[0], interpPress, 1.77*10**3, .2*10**-7, 140*10**-3, 3)
+    yp[5], yp[6] = calcdr(y[5], y[2], y[0], interpPress, y[6], 1.77*10**3, .2*10**-7, 140*10**-3, 3, y[1])
     return yp
 
 if __name__ == "__main__":
