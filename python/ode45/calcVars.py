@@ -30,17 +30,18 @@ def calcdT(height, Wt, Tparc, interpPress, Wvel):
     [wvparc, wlparc] = findWvWl(Tparc, Wt, Press)
     Tvparc=Tparc*(1. + c.eps*wvparc)
     rho = 1.0*Press/(c.Rd*Tvparc)
-    Ws = wsat(Tparc, Press)#assumed saturated?
+    Ws = wsat(Tparc, Press)
 
     rho= 1.0*Press/(c.Rd*Tvparc) #density of the parcel
 
     Pressv = 1.0*(wvparc/(wvparc + c.eps))*Press
-    
-    dWs=(Ws + Ws**2)*(1.0*c.lv0/(c.Rv*Tparc**2))
+    es = esat(Tparc)
+    dWsdT=(Ws + Ws**2)*(1.0*c.lv0/(c.Rv*Tparc**2))
+    dWsdP = -1.0*(c.eps*es)/(Press - es)**2
 
     Pressd = Press - Pressv
     
-    dT = (1.0*c.Rd*Tparc/(c.cpd*Pressd))*Wvel*(-c.g0*rho)*(1.0/(1 - (c.lv0*Ws)/(c.cpd*Tparc) + (1.0*c.lv0/c.cpd)*dWs))
+    dT = (1.0*c.Rd*Tparc/(c.cpd*Pressd) - 1.0*(c.lv0*dWsdP)/(c.cpd))*Wvel*(-c.g0*rho)*(1.0/(1 - (c.lv0*Ws)/(c.cpd*Tparc) + (1.0*c.lv0/c.cpd)*dWsdT))
 
     a = 1.0*(1+Wt)/(1+wvparc*(1.0*c.cpv/c.cpd))
     b = 1+1.0*c.lv0/(c.Rd*Tparc)
@@ -48,11 +49,11 @@ def calcdT(height, Wt, Tparc, interpPress, Wvel):
     d = 1.0*c.lv0**2*wvparc*(1 + 1.0*wvparc/c.eps)/(c.Rv*Tparc**2*(c.cpd + wvparc*c.cpv))
 
     check1dT = -1.0*(1.0*c.g0*Wvel/c.cpd)*a*b/(1+C+d)
-    checkdT = -1.0*(c.g0*Wvel)/(c.cpd + c.lv0*dWs)
+    checkdT = -1.0*((c.g0 + c.lv0*dWsdP*(-rho*c.g0))*Wvel)/(c.cpd + c.lv0*dWsdT)
     
     return dT, checkdT, check1dT
 
-def calcdr(rad, Tparc, height, interpPress, rho_a, r_a, M_a, I_no):
+def calcdr(rad, Tparc, height, interpPress, pressv, rho_a, r_a, M_a, I_no, wvel):
     rho_d = 1000 #can i assume this?
     Rg = 8.3143
     Md = 28.97
@@ -73,11 +74,17 @@ def calcdr(rad, Tparc, height, interpPress, rho_a, r_a, M_a, I_no):
     Press=interpPress(height)*100
     
     Ws = wsat(Tparc, Press)
+
+    wvparc = .622*(pressv/(Press - pressv)) 
+    Tvparc = Tparc*(1. + c.eps*wvparc)
+    rho = 1.0*Press/(c.Rd*Tvparc)
     
-    Pressv = 1.0*(Ws/(Ws + c.eps))*Press
+    #Pressv = 1.0*(Ws/(Ws + c.eps))*Press
 
     Dv = 1000.0*2.21*10**-5/Press#Curry&Webster p144 
-    dr = (1.0/rad)*(1.0*Dv/(rho_l*c.Rv*Tparc))*(Pressv - e_drop)
-    return dr
+    dr = (1.0/rad)*(1.0*Dv/(rho_l*c.Rv*Tparc))*(pressv - e_drop)
+    dpressv = -(1.0*Press/c.eps)*(rad**2)*(dr) - c.g0*wvel*rho
+        
+    return dr, dpressv
     
     
