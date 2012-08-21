@@ -7,12 +7,31 @@ from findWvWl import findWvWl
 from esat import *
 from T_thetaep import t_thetaep
 
-def calcBuoy(height, Wt, Tparc, interpTenv, interpTdEnv, interpPress):
+"""
+For use in 
 
-    #input: height (m), thetae0 (K), plus function handles for
-    #T,Td, press soundings
-    #output: Bout = buoyant acceleration in m/s^2
-    #neglect liquid water loading in the virtual temperature
+Input:
+    height (m)
+    Wt  = totaly water 
+    Tparc  = parcel temperature (K)
+    Wvel = vertical velocity (m/s)
+    rad = droplet radius (m)
+    pressv = vapour pressure (Pa)
+    rho_a, r_a, M_a, I_no = density, radius, mass and vant hoff factor for inucleating aerosol. 
+    plus function handles for T,Td, press soundings
+
+output: 
+    Bout = buoyant acceleration in m/s^2
+     = rate of change of temperature
+     = rate of change of vapour pressure
+     = rate of change of droplet radius
+"""
+
+def calc_Vars(height, Wt, Tparc, Wvel, rad, pressv, rho_a, r_a, M_a, I_no, interpTenv, interpTdEnv, interpPress):
+
+    #Should include liquid water loading in the virtual temperature
+    #Should unify calc of water vapour
+    #Should test for saturation and replace Ws with Wv
     
     Press = interpPress(height)*100 #Pa
     [wvparc, wlparc] = findWvWl(Tparc, Wt, Press) #kg/kg
@@ -22,20 +41,15 @@ def calcBuoy(height, Wt, Tparc, interpTenv, interpTdEnv, interpPress):
     wvenv = wsat(Tdenv,Press) #kg/kg
     Tvenv = Tenv*(1. + c.eps*wvenv)
     TvDiff = Tvparc - Tvenv
-    dW = c.g0*(TvDiff/Tvenv)    
-    return dW 
+    dW = c.g0*(TvDiff/Tvenv)
 
-def calcdT(height, Wt, Tparc, interpPress, Wvel):
-    Press=interpPress(height)*100.
-    [wvparc, wlparc] = findWvWl(Tparc, Wt, Press)
-    Tvparc=Tparc*(1. + c.eps*wvparc)
-    rho = 1.0*Press/(c.Rd*Tvparc)
     Ws = wsat(Tparc, Press)
 
     rho= 1.0*Press/(c.Rd*Tvparc) #density of the parcel
 
     Pressv = 1.0*(wvparc/(wvparc + c.eps))*Press
     es = esat(Tparc)
+
     dWsdT=(Ws + Ws**2)*(1.0*c.lv0/(c.Rv*Tparc**2))
     dWsdP = -1.0*(c.eps*es)/(Press - es)**2
 
@@ -50,10 +64,6 @@ def calcdT(height, Wt, Tparc, interpPress, Wvel):
 
     check1dT = -1.0*(1.0*c.g0*Wvel/c.cpd)*a*b/(1+C+d)
     checkdT = -1.0*((c.g0 + c.lv0*dWsdP*(-rho*c.g0))*Wvel)/(c.cpd + c.lv0*dWsdT)
-    
-    return dT, checkdT, check1dT
-
-def calcdr(rad, Tparc, height, interpPress, pressv, rho_a, r_a, M_a, I_no, wvel):
     rho_d = 1000 #can i assume this?
     Rg = 8.3143
     Md = 28.97
@@ -70,17 +80,18 @@ def calcdr(rad, Tparc, height, interpPress, pressv, rho_a, r_a, M_a, I_no, wvel)
     
     e_drop = e_s*(1 + 1.*a/rad  - 1.0*b/rad**3)#W&H ex6.12
 
-    Press=interpPress(height)*100    
-    Ws = wsat(Tparc, Press)
     wvparc = .622*(pressv/(Press - pressv)) 
     Tvparc = Tparc*(1. + c.eps*wvparc)
     rho = 1.0*Press/(c.Rd*Tvparc)
     
-    #Pressv = 1.0*(Ws/(Ws + c.eps))*Press
-
     Dv = 1000.0*(2.21*10**-5)/Press #Curry&Webster p144 
+
     dr = (1.0/rad)*(1.0*Dv/(rho_l*c.Rv*Tparc))*(pressv - e_drop)
-    dpressv = -(1.0*Press/c.eps)*(4*np.pi*rad**2)*(dr) - (c.g0*wvel*rho/Press)
-    return dr, dpressv
+    dpressv = -(1.0*Press/c.eps)*(4*np.pi*rad**2)*(dr) - (c.g0*Wvel*rho/Press)
+    
+    return dW, dT, checkdT, check1dT, dr, dpressv 
+
+
+    
     
     
