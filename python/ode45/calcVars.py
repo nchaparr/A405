@@ -60,7 +60,6 @@ def calcdr(rad, Tparc, height, interpPress, pressv, rho_a, r_a, M_a, I_no, wvel)
     rho_l =  1000 #can i assume this?
     sigma_w = .076
     M_w = 18
-
     v_a = (1.0*4/3)*np.pi*r_a**3 #volume of the aerosol partical in m**3
     m_a = v_a*rho_a #mass of the aerosol in Kg
        
@@ -71,20 +70,17 @@ def calcdr(rad, Tparc, height, interpPress, pressv, rho_a, r_a, M_a, I_no, wvel)
     
     e_drop = e_s*(1 + 1.*a/rad  - 1.0*b/rad**3)#W&H ex6.12
 
-    Press=interpPress(height)*100
-    
+    Press=interpPress(height)*100    
     Ws = wsat(Tparc, Press)
-
     wvparc = .622*(pressv/(Press - pressv)) 
     Tvparc = Tparc*(1. + c.eps*wvparc)
     rho = 1.0*Press/(c.Rd*Tvparc)
     
     #Pressv = 1.0*(Ws/(Ws + c.eps))*Press
 
-    Dv = 1000.0*2.21*10**-5/Press#Curry&Webster p144 
+    Dv = 1000.0*(2.21*10**-5)/Press #Curry&Webster p144 
     dr = (1.0/rad)*(1.0*Dv/(rho_l*c.Rv*Tparc))*(pressv - e_drop)
-    dpressv = -(1.0*Press/c.eps)*(rad**2)*(dr) - c.g0*wvel*rho
-        
+    dpressv = -(1.0*Press/c.eps)*(4*np.pi*rad**2)*(dr) - (c.g0*wvel*rho/Press)
     return dr, dpressv
     
     
