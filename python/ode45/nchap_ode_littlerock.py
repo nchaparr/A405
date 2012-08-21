@@ -57,7 +57,7 @@ def ode_littlerock():
     Tparc0 = 290
     Wt = .013
     ws0 = wsat(Tparc0, press0)
-    pressv0 = 1.0*(ws0/(ws0 + c.eps))*press0
+    pressv0 = 1.0*(Wt/(Wt + c.eps))*press0
     RelH0 = (100*Wt/ws0)
 
     #if saturated, stop
@@ -78,7 +78,7 @@ def ode_littlerock():
 
     yinit = [height0, 0.5, Tparc0, Tparc0, Tparc0, r0, pressv0]  #(intial velocity = 0.5 m/s, initial height in m)
     tinit = 0
-    tfin = 100
+    tfin = 200
     dt = .1
     
     #want to integrate F using ode45 (from MATLAB) equivalent integrator
@@ -112,7 +112,7 @@ def ode_littlerock():
         if Wt > ws - .000001 and Wt < ws + .000001:
             print 'becomes saturated at around:' , r.y[0], 'meters'
                             
-        print "thetaep test: ", thetaep(wv, T, P), thetaeVal
+            #print "thetaep test: ", thetaep(wv, T, P), thetaeVal
     
     wvel = y[:,1]
     Tparc = y[:,2]
@@ -122,25 +122,41 @@ def ode_littlerock():
     pressv = y[:,6]
     radius = y[:,5]
     
-    fig = plt.figure(1)
-    #ax1=fig.add_subplot(121)
-    #ax1.plot(wvel, height, 'o')
-    #plt.xlabel('vertical velocity')
-    #plt.ylabel('height above surface (m)')
-    ax2=fig.add_subplot(121)
+    fig1 = plt.figure(1)
+    plt.clf()
+    plt.ylabel('height above surface (m)')
+    ax1=fig1.add_subplot(121)
     plt.plot(pressv, height, 'k *')
-    #plt.plot(Tcheck, height, 'b o')
-    #plt.plot(Tcheck1, height, 'r +')
-    labels = ax2.get_xticklabels()
+    labels = ax1.get_xticklabels()
     for label in labels:
         label.set_rotation(30)
-    ax3=fig.add_subplot(122)
+    plt.xlabel('Vapour Pressure')
+
+    ax2=fig1.add_subplot(122)
     plt.plot(radius, height, 'o')
+    labels = ax2.get_xticklabels()
+    for label in labels:
+       label.set_rotation(30) 
+    plt.legend(loc = 'lower left')
+    plt.xlabel('Radius')
+    plt.show()
+
+    fig2 = plt.figure(2)
+    plt.ylabel('height above surface (m)')
+    ax3=fig2.add_subplot(121)
+    plt.plot(wvel, height, 'k *')
     labels = ax3.get_xticklabels()
     for label in labels:
-        label.set_rotation(30) 
-    #plt.legend(loc = 'lower left')
-    plt.xlabel('radius profile')
+      label.set_rotation(30)
+
+    plt.xlabel('Vertical Velocity')
+    ax4=fig2.add_subplot(122)
+    plt.plot(Tparc, height, 'o')
+    labels = ax4.get_xticklabels()
+    for label in labels:
+       label.set_rotation(30) 
+    plt.legend(loc = 'lower left')
+    plt.xlabel('Temperature')
     plt.show()
         
 #F returns the buoyancy (and height)at a given time step and height
