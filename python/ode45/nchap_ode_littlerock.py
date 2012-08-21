@@ -8,17 +8,20 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 """ 
+Pulls data from littlerock sounding.
+
+Sets initial values of for parcel variables.
+
+Integrator integrates function (F) for calculating the time derivatives for all variables
 
 """
 
 from constants import constants as c
 from nudge import nudge
 from my_thetaep import thetaep
-from calcVars import calcBuoy
+from calcVars import *
 from T_thetaep import t_thetaep
 from wsat import wsat
-from calcVars import calcdT
-from calcVars import calcdr
 from findWvWl import findWvWl
 from find_r import *
 from esat import esat
@@ -159,13 +162,11 @@ def ode_littlerock():
     plt.xlabel('Temperature')
     plt.show()
         
-#F returns the buoyancy (and height)at a given time step and height
+#F returns the buoyancy (and height) and rates of change of Temperature, Droplet Radius and Vapour Pressure with time, at a given time step and height
 def F(t, y, Wt, interpTenv, interpTdEnv, interpPress):
     yp = np.zeros((7,1))
     yp[0] = y[1]
-    yp[1] = calcBuoy(y[0], Wt, y[2], interpTenv, interpTdEnv, interpPress)
-    yp[2], yp[3], yp[4] = calcdT(y[0], Wt, y[2], interpPress, y[1])
-    yp[5], yp[6] = calcdr(y[5], y[2], y[0], interpPress, y[6], 1.77*10**3, .2*10**-7, 140*10**-3, 3, y[1])
+    yp[1], yp[2], yp[3], yp[4], yp[5], yp[6] = calc_Vars(y[0], Wt, y[2], y[1], y[5], y[6], 1.77*10**3, .2*10**-7, 140*10**-3, 3, interpTenv, interpTdEnv, interpPress)
     return yp
 
 if __name__ == "__main__":
