@@ -24,6 +24,7 @@ from T_thetaep import t_thetaep
 from wsat import wsat
 from findWvWl import findWvWl
 from find_r import *
+from aerodist import *
 from esat import esat
     
 def ode_littlerock():
@@ -73,10 +74,13 @@ def ode_littlerock():
     thetaeVal = thetaep(wv0, Tparc0, press0)
         
     print 'Initial Temperature, thetaeVal', Tparc0, thetaeVal
-    print 'Initial Relative humidity, Wsat, Wt', RelH0, ws0, Wt
-      
+    print 'Initial Relative humidity, Wsat, Wt, pressv0, Press0', RelH0, ws0, Wt, pressv0, press0
+
+    #aerosol properties
     #get initial radius
-    r0 = do_r_find(1.0*RelH0/100)[0]
+    r_a = 1*10**-8
+    rho_a = 1775
+    r0 = do_r_find(1.0*RelH0/100, r_a, rho_a)[0]
     print 'Initial radius', r0       
 
     yinit = [height0, 0.5, Tparc0, Tparc0, Tparc0, r0, pressv0]  #(intial velocity = 0.5 m/s, initial height in m)
@@ -86,7 +90,7 @@ def ode_littlerock():
     
     #want to integrate F using ode45 (from MATLAB) equivalent integrator
     r = ode(F).set_integrator('dopri5')
-    r.set_f_params(Wt, interpTenv, interpTdEnv, interpPress)
+    r.set_f_params(Wt,rho_a,r_a, interpTenv, interpTdEnv, interpPress)
     r.set_initial_value(yinit, tinit)
     
     y = np.array(yinit)
@@ -130,11 +134,12 @@ def ode_littlerock():
     plt.ylabel('height above surface (m)')
     ax1=fig1.add_subplot(121)
     plt.plot(pressv, height, 'k *')
-    labels = ax1.get_xticklabels()
-    for label in labels:
-        label.set_rotation(30)
+    #labels = ax1.get_xticklabels()
+    #for label in labels:
+    #    label.set_rotation(30)
     plt.xlabel('Vapour Pressure')
-
+    plt.xlim(0, pressv0)
+    
     ax2=fig1.add_subplot(122)
     plt.plot(radius, height, 'o')
     labels = ax2.get_xticklabels()
@@ -145,14 +150,15 @@ def ode_littlerock():
     plt.show()
 
     fig2 = plt.figure(2)
+    plt.clf()
     plt.ylabel('height above surface (m)')
     ax3=fig2.add_subplot(121)
     plt.plot(wvel, height, 'k *')
     labels = ax3.get_xticklabels()
     for label in labels:
       label.set_rotation(30)
-
     plt.xlabel('Vertical Velocity')
+    
     ax4=fig2.add_subplot(122)
     plt.plot(Tparc, height, 'o')
     labels = ax4.get_xticklabels()
@@ -163,10 +169,10 @@ def ode_littlerock():
     plt.show()
         
 #F returns the buoyancy (and height) and rates of change of Temperature, Droplet Radius and Vapour Pressure with time, at a given time step and height
-def F(t, y, Wt, interpTenv, interpTdEnv, interpPress):
+def F(t, y, Wt, rho_a, r_a, interpTenv, interpTdEnv, interpPress):
     yp = np.zeros((7,1))
     yp[0] = y[1]
-    yp[1], yp[2], yp[3], yp[4], yp[5], yp[6] = calc_Vars(y[0], Wt, y[2], y[1], y[5], y[6], 1.77*10**3, .2*10**-7, 140*10**-3, 3, interpTenv, interpTdEnv, interpPress)
+    yp[1], yp[2], yp[3], yp[4], yp[5], yp[6] = calc_Vars(y[0], Wt, y[2], y[1], y[5], y[6], rho_a, r_a, 140*10**-3, 3, interpTenv, interpTdEnv, interpPress)
     return yp
 
 if __name__ == "__main__":
