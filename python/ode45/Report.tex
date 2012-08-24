@@ -1,0 +1,173 @@
+% !TEX TS-program = pdflatex
+% !TEX encoding = UTF-8 Unicode
+
+% This is a simple template for a LaTeX document using the "article" class.
+% See "book", "report", "letter" for other types of document.
+
+\documentclass[11pt]{article} % use larger type; default would be 10pt
+
+\usepackage[utf8]{inputenc} % set input encoding (not needed with XeLaTeX)
+
+%%% Examples of Article customizations
+% These packages are optional, depending whether you want the features they provide.
+% See the LaTeX Companion or other references for full information.
+
+%%% PAGE DIMENSIONS
+\usepackage{geometry} % to change the page dimensions
+\usepackage{amsfonts}
+\usepackage{color}
+\geometry{a4paper} % or letterpaper (US) or a5paper or....
+% \geometry{margins=2in} % for example, change the margins to 2 inches all round
+% \geometry{landscape} % set up the page for landscape
+%   read geometry.pdf for detailed page layout information
+
+\usepackage{graphicx} % support the \includegraphics command and options
+
+% \usepackage[parfill]{parskip} % Activate to begin paragraphs with an empty line rather than an indent
+
+%%% PACKAGES
+\usepackage{booktabs} % for much better looking tables
+\usepackage{array} % for better arrays (eg matrices) in maths
+\usepackage{paralist} % very flexible & customisable lists (eg. enumerate/itemize, etc.)
+\usepackage{verbatim} % adds environment for commenting out blocks of text & for better verbatim
+\usepackage{subfig} % make it possible to include more than one captioned figure/table in a single float
+% These packages are all incorporated in the memoir class to one degree or another...
+
+%%% HEADERS & FOOTERS
+\usepackage{fancyhdr} % This should be set AFTER setting up the page geometry
+\pagestyle{fancy} % options: empty , plain , fancy
+\renewcommand{\headrulewidth}{0pt} % customise the layout...
+\lhead{}\chead{}\rhead{}
+\lfoot{}\cfoot{\thepage}\rfoot{}
+
+%%% SECTION TITLE APPEARANCE
+\usepackage{sectsty}
+\allsectionsfont{\sffamily\mdseries\upshape} % (See the fntguide.pdf for font help)
+% (This matches ConTeXt defaults)
+
+%%% ToC (table of contents) APPEARANCE
+\usepackage[nottoc,notlof,notlot]{tocbibind} % Put the bibliography in the ToC
+\usepackage[titles,subfigure]{tocloft} % Alter the style of the Table of Contents
+\renewcommand{\cftsecfont}{\rmfamily\mdseries\upshape}
+\renewcommand{\cftsecpagefont}{\rmfamily\mdseries\upshape} % No bold!
+\usepackage{amsmath}
+%%% END Article customizations
+
+\setlength{\parindent}{0in}
+
+%%% The "real" document content comes below...
+
+\title{Cloud Physics Course Project}
+
+\author{Niamh Chaparro}
+%\date{} % Activate to display a given date or no date (if empty),
+         % otherwise the current date is printed 
+
+\begin{document}
+
+\maketitle
+
+\section{Parcel Setup, Initial Values}
+
+Key initial properties of the parcel are assigned ($press0, Tparc0, Wt$) and calculated $ws0, RelH0, prevssv0, thetaeVal$.  There is a test for saturation; the parcel should be unsaturated initially.\\
+
+Assumption 1: $w_{t}$  is conserved\\
+
+This parcel is placed at 885 meters. Equivalent potential temperature is calculated using $my \textunderscore thetaep$ which uses the same formula as that from which the temperature ODE is derived in a following section.  Initial vapour pressure $pressv0$ is calculated: $e = \left( \frac{w_{v}}{w_{v} + \epsilon } \right) \times p $.   Worth noting is the use of  $P_{d} = P - \frac{w_{v}}{w_{v} - \epsilon} \times P = \frac{\epsilon}{w_{v} + \epsilon} P = P - e$.  I'm not sure why I use this instead of P, but believe the effect is minimal.  The initial radius ($r0$) is obtained using $do \textunderscore r \textunderscore find()$. 
+
+\section{ODEs} 
+
+There are odes for the rate of change of Temperature, Vapour Pressure and Droplet Radius.\\
+
+Note: There is no interaction between these odes so no communication regarding water content.  It should be possible to use the vapour pressure calculated with change in radius in the other ODEs.\\
+
+{\bf Rate of Change of Temperature wrt Time - $\frac{dT}{dt}$}\\
+
+$\theta_{e} = T \times (\frac{P_{0}}{P_{d}})^{\frac{R_{d}}{C_{p}}}\times exp(\frac{L_{v}w_{sat}}{C_{p}T})$ (\emph{should really have} $w_{v}$)\\
+
+Conserved with respect to time, so $\frac{d \theta_{e}}{dt} = $\\
+
+$\frac{dT}{dt}(\frac{P_{0}}{P_{d}})^{\frac{R_{d}}{C_{p}}}  - \frac{R_{d}T}{C_{p}}(\frac{P_{0}}{P_{d}})^{\frac{R_{d}}{C_{p}}}\frac{1}{P_{d}}\frac{dP_{d}}{dt} + \frac{d}{dt} (\frac{L_{v}w_{s}}{C_{p}T}) \times T(\frac{P_{0}}{P_{d}})^{\frac{R_{d}}{C_{p}}} = 0$\\
+
+$\frac{dT}{dt}  - \frac{R_{d}T}{C_{p}}\frac{1}{P_{d}}\frac{dP_{d}}{dt} - \frac{L_{v}w_{s}}{C_{p}T}\frac{dT}{dt} + \frac{L_{v}}{C_{p}}\frac{dT}{dt}\frac{dw_{s}}{dT}+ \frac{L_{v}}{C_{p}}\frac{dw_{s}}{dP_{d}}\frac{dP_{d}}{dt} = 0$\\
+
+$\frac{dT}{dt}(1 - \frac{L_{v}w_{s}}{C_{p}T} + \frac{L_{v}}{C_{p}}\frac{dw_{s}}{dT}) = (\frac{R_{d}T}{C_{p}P_{d}} - \frac{L_{v}}{C_{p}}\frac{dw_{s}}{dP})\frac{dP_{d}}{dt} = 0$\\
+
+$\frac{dT}{dt} = (\frac{R_{d}T}{C_{p}P_{d}} - \frac{L_{v}}{C_{p}}\frac{dw_{s}}{dP})(1 - \frac{L_{v}w_{s}}{C_{p}T} + \frac{L_{v}}{C_{p}}\frac{dw_{s}}{dT})^{-1} \times w \times (-\rho g)$\\
+
+$\frac{dw_{s}}{dT} = (w_{s} + w_{s}^{2})\frac{1}{e_{s}}\frac{de_{s}}{dT}, \frac{de_{s}}{dT} = \frac{L_{v} e_{s}}{R_{v}T^{2}}, \frac{dw_{s}}{dP} = -\frac{\epsilon \times e_{s}}{(P - e_{s})^{2}}$ \\
+
+\emph{Another Way - tcheck} \\
+
+$h_{m} = C_{p}T + L_{v}w_{s} + gz$\\
+
+$ \frac{dh_{m}}{dz} = C_{p} \frac{dT}{dz} + L_{v} \frac{dw_{s}}{dT} \frac{dT}{dz} + L_{v}\frac{dw_{s}}{dP} \frac{dP}{dz} + g $ \\
+
+$ \frac{dT}{dz} w = \frac{dT}{dt} = - \frac{(g + L_{v}\frac{dw_{s}}{dP} \frac{dP}{dz})w}{C_{p} + L_{v} \frac{dw_{s}}{dT}} $\\
+
+Note: it's now taken into consideration that $w_{s}$ is dependent on pressure.\\
+
+\emph{From Emanuel - tcheck1} \\
+
+$a = \frac{1 + w_{t}}{1 + w_{v}\frac{C_{pv}}{C_{pd}}}$, $b = 1 + \frac{L_{v}w_{v}}{R_{d}T}$, $c = w_{l}(\frac{C_{l}}{C_{pd + w_{v}C_{pv}}})$, $d = \frac{L_{v}^{2}w_{v}(1+\frac{w_{v}}{\epsilon})}{R_{v}T^{2}(C_{pd + w_{v}C_{pv}})}$\\
+
+$-(\frac{dT}{dz})_{s} = \frac{g}{C_{pd}}(\frac{a}{1 + b + c})$ and $\frac{dT}{dt} = -\frac{gw}{C_{pd}}(\frac{a}{1 + b + c})$\\
+
+\subsection{Test on Thetae Conservation}
+
+$\theta_{e}$ should be conserved as the parcel rises with time. This property as calculated at each timestep using $my \textunderscore thetaep$ 
+now varies less due to taking $\frac{dW_{s}}{dP}$ into consideration.\\
+
+\subsection{Test on Change in dT after Saturation}
+
+There should be a visible change ('kink') in the temperature profile around the point at which the parcel becomes saturated.  This is not apparant.  This would probably happen if there is are two different $\frac{dT}{dt}$ s: one with $w_{s}$, the other with $w_{v}$\\
+
+{\bf Droplet Radius -- $\frac{dr}{dt}$} \\
+
+$\frac{dr}{dt} = \frac{D_{v}\rho_{v}(parcel)}{r \rho_{l \ in \ droplet}e(parcel)} \times [e(parcel) - e(r)]$\\
+
+$\frac{\rho_{v}(parcel)}{e(parcel)} = \frac{ r \rho_{v}(parcel)}{\rho_{v}R_{v}T} = \frac{1}{R_{v}T}$ ?\\
+
+Take the density of the droplet as being that of water ?\\
+
+$\frac{dr}{dt} = \frac{D_{v}}{r \rho_{w}R_{v}T} \times [e(parcel) - e(r)]$\\
+
+$e(r) = e_{s} \times \left(1 + \frac{a}{r} - \frac{b}{r^{3}} \right) $\\
+
+{\bf Vapour Pressure -- $\frac{de}{dt}$}\\
+
+$\frac{dw_{v}}{dt} = \frac{\epsilon}{p} \frac{de}{dt} - \frac{\epsilon e}{p^{2}}\frac{dp}{dt}$\\
+
+$ = - \frac{dw_{l}}{dt} = \frac{d}{dt} \left( -N_{aero} \frac{4 \pi}{3} r^{3} \right) = -N_{aero} 4 \pi r^{2} \frac{dr}{dt}$\\
+
+$ \frac{\epsilon}{p} \left( \frac{de}{dt} - \frac{dp}{dt}\right) = -N_{aero} 4 \pi r^{2} \frac{dr}{dt}$\\
+
+$\frac{de}{dt} = -\frac{p}{\epsilon} N_{aero} 4 \pi r^{2} \frac{dr}{dt} - \frac{g\rho w}{p}$\\
+
+\section{Integration}
+
+Initial values are placed in a list: yinit.  Start time, end time and time step (tinit, tfin, dt) are set.  The integrator is selected (dopri5).
+
+\section{Output and Plot}
+
+\includegraphics[scale=.4]{output}\\
+
+\includegraphics[scale=.4]{output2}\\
+
+\includegraphics[scale=.4]{output1}\\
+
+\includegraphics[scale=.5]{figure_1}\\
+
+\includegraphics[scale=.5]{figure_2}\\
+
+\includegraphics[scale=.5]{figure_3}\\
+
+\section{Next Steps}
+
+$10^{8}M^{-1}$ of the same size
+
+Then multiple sizes from a distribution.
+
+\end{document}
+
+ 
