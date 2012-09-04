@@ -128,22 +128,28 @@ def calc_Vars(height, Wt, Tparc, Wvel, rad, SS, rho_a, r_a, r0, M_a, I_no, inter
     rhovs = es/(c.Rv*Tparc) 
     Dv = 1000.0*(2.21*10**-5)/Press #Diffusion constant, Curry&Webster p144 
     #rad will be an array
-    
-    if rad > r0:
-        dr = (1.0/rad)*(1.0*Dv*rhovs/rho_l)*(SS)
+
+    if rad <= r0 and (1.0/rad)*(1.0*Dv*rhovs/rho_l)*(SS) < 0:        dr = 0
     else:
-        dr = 0
+         dr = (1.0/rad)*(1.0*Dv*rhovs/rho_l)*(SS)
+
+    print 'initial radius, radius, dr', r0, rad, dr
         
     dwl = N_a*rho_l*4.0*np.pi*(rad**2)*dr                
     dwv = -dwl
     des = 1.0*(c.lv0*es)/(c.Rv*(Tparc**2)) 
     #will have three arrays here: Num_a, rad, and dr, so will need to do two np.multiplies() to get a product array for first term here
-     
-    dSS =  (dwv -(1+SS)*c.eps*(1.0*des*dT/Press + (1.0*es/(Press**2))*(rho*Wvel*c.g0)))*(1.0*Press/(c.eps*es))
-    print 'Wt, wvparc, testwv ', Wt, wvparc, testwv 
+    phildT = -(1.0*c.lv0)/(c.cpd)*dwv - (1.0*c.g0)/(c.cpd)*Wvel
     
-        
-    return dW, dT, checkdT, check1dT, dr, dSS 
+    term1 = (-c.eps*es/Press**2)*(-c.g0*Press*Wvel/(c.Rd*Tparc)) 
+    term2 = (c.eps/Press)*(c.eps*es*c.lv0/(c.Rd*Tparc**2))*dT
+
+    dSS =  (Press/(c.eps*es))*(dwv - (1+SS)*(term1 + term2))
+
+    print'Wt, micro, bulk wvs', Wt, wvparc, testwv   
+    print 'SS, dSS, dwv, term1, term2, w, dT', SS, dSS, dwv, term1, term2, Wvel, dT    
+            
+    return dW, phildT, checkdT, check1dT, dr, dSS 
 
 
     
