@@ -89,7 +89,7 @@ def ode_littlerock():
     yinit = [height0, 0.5, Tparc0, Tparc0, Tparc0, r0, SS0]  #(intial velocity = 0.5 m/s, initial height in m)
     tinit = 0
     tfin = 100
-    dt = 2
+    dt = 1
     
     #want to integrate F using ode45 (from MATLAB) equivalent integrator
     r = ode(F).set_integrator('dopri5')
@@ -118,13 +118,14 @@ def ode_littlerock():
         
         T = r.y[2]
         [wv, wl] = findWvWl(T, Wt, P)
+        
         ws = wsat(T, P)
         WSat.append(ws)
        
         if Wt > ws - .000001 and Wt < ws + .000001:
             print 'becomes saturated at around:' , r.y[0], 'meters'
         print ""                    
-        print "thetaep test: ", thetaep(wv, T, P), thetaeVal
+        #print "thetaep test: ", thetaep(wv, T, P), thetaeVal
         print ""
         
     wvel = y[:,1]
