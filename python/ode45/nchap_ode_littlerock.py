@@ -59,9 +59,11 @@ def ode_littlerock():
     #Setting initial properties of parcel
     press0 = interpPress(height0)*100
     Tparc0 = 290
-    Wt = .011
+    Wt = .0135
     ws0 = wsat(Tparc0, press0)
+    es0 = esat(Tparc0)
     pressv0 = (1.0*Wt/(Wt + c.eps))*press0
+    SS0 = 1.0*pressv0/es0 - 1
     RelH0 = (100*Wt/ws0)
 
     #if saturated, stop
@@ -84,10 +86,10 @@ def ode_littlerock():
     r0 = do_r_find(1.0*RelH0/100, r_a, rho_a)[0]
     print 'Initial radius', r0       
     #will need to add in all r0 values
-    yinit = [height0, 0.5, Tparc0, Tparc0, Tparc0, r0, pressv0]  #(intial velocity = 0.5 m/s, initial height in m)
+    yinit = [height0, 0.5, Tparc0, Tparc0, Tparc0, r0, SS0]  #(intial velocity = 0.5 m/s, initial height in m)
     tinit = 0
     tfin = 100
-    dt = 1
+    dt = 2
     
     #want to integrate F using ode45 (from MATLAB) equivalent integrator
     r = ode(F).set_integrator('dopri5')
@@ -121,24 +123,23 @@ def ode_littlerock():
        
         if Wt > ws - .000001 and Wt < ws + .000001:
             print 'becomes saturated at around:' , r.y[0], 'meters'
-                            
-            #print "thetaep test: ", thetaep(wv, T, P), thetaeVal
-    
+        print ""                    
+        print "thetaep test: ", thetaep(wv, T, P), thetaeVal
+        print ""
+        
     wvel = y[:,1]
     Tparc = y[:,2]-273.5
     height = y[:,0]
     Tcheck = y[:,3]
     Tcheck1 = y[:,4]
-    pressv = y[:,6]
+    SS = y[:,6]
     Press = np.array(Press)
-    wv = np.divide(c.eps*pressv, (np.subtract(Press,  pressv)))
     radius = y[:,5] #will become a 2d array of radii
     
     fig1 = plt.figure(1)
     plt.clf()
     plt.ylabel('height above surface (m)')
     ax1=fig1.add_subplot(111)
-    plt.plot(wv, -Press, 'k *')
     plt.plot(WSat, -Press, 'ro')
     labels = ax1.get_xticklabels()
     for label in labels:
