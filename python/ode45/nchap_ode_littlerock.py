@@ -77,15 +77,13 @@ def ode_littlerock():
         
     print 'Initial Temperature, thetaeVal', Tparc0, thetaeVal
     print 'Initial Relative humidity, Wsat, Wt, pressv0, Press0', RelH0, ws0, Wt, pressv0, press0
-    #aerosol propertiesy
+    #aerosol properties
     #will become: r_a, Num_a, mass_a, prop_a = Aero_dist
     #get initial radius
     r_a = 2.378*10**-8 
     rho_a = 1775
-    #will become r0 = [do_r_find(1.0*RelH0/100, r, rho_a) for r in r_a]
-    r0 = do_r_find(1.0*RelH0/100, r_a, rho_a)[0]
-    print 'Initial radius', r0       
-    #will need to add in all r0 values
+    r0 = do_r_find(RelH0/100, r_a, rho_a)[0]
+    #will needto add in all r0 values
     yinit = [height0, 0.5, Tparc0, Tparc0, Tparc0, r0, SS0]  #(intial velocity = 0.5 m/s, initial height in m)
     tinit = 0
     tfin = 100
