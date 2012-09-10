@@ -65,7 +65,7 @@ def calc_Vars(height, Wt, Tparc, Wvel, rad, SS, rho_a, r_a, r0, M_a, I_no, inter
     N_a = 10**9 #number/m**3
 
      #Test on total water according to adiabats
-    
+     
     dWsdT=(Ws + Ws**2)*(1.0*c.lv0/(c.Rv*Tparc**2))
     
     dWsdP = -1.0*(c.eps*es)/(Press - es)**2
@@ -111,7 +111,7 @@ def calc_Vars(height, Wt, Tparc, Wvel, rad, SS, rho_a, r_a, r0, M_a, I_no, inter
     print'Wt, micro, bulk wvs', Wt, wvparc, testwv   
     print 'SS, dSS, dwv, term1, term2, w, dT', SS, dSS, dwv, term1, term2, Wvel, dT    
             
-    return dW, phildT, checkdT, check1dT, dr, dSS 
+    return dW, dT, checkdT, check1dT, dr, dSS 
 
 
     
