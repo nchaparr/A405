@@ -59,7 +59,7 @@ def ode_littlerock():
     #Setting initial properties of parcel
     press0 = interpPress(height0)*100
     Tparc0 = 290
-    Wt = .0135
+    Wt = .013
     ws0 = wsat(Tparc0, press0)
     es0 = esat(Tparc0)
     pressv0 = (1.0*Wt/(Wt + c.eps))*press0
@@ -78,13 +78,15 @@ def ode_littlerock():
     print 'Initial Temperature, thetaeVal', Tparc0, thetaeVal
     print 'Initial Relative humidity, Wsat, Wt, pressv0, Press0', RelH0, ws0, Wt, pressv0, press0
     #aerosol properties
-    #will become: r_a, Num_a, mass_a, prop_a = Aero_dist
+    #will become: r_a, Num_a, mass_a, prob_a = Aero_dist
     #get initial radius
     r_a = 2.378*10**-8 
     rho_a = 1775
+    #r0 = np.array([do_r_find(RelH0/100, r, r_a) for r in r_a])
     r0 = do_r_find(RelH0/100, r_a, rho_a)[0]
     #will needto add in all r0 values
-    yinit = [height0, 0.5, Tparc0, Tparc0, Tparc0, r0, SS0]  #(intial velocity = 0.5 m/s, initial height in m)
+    yinit = [height0, 0.5, Tparc0, SS0, r0] #(intial velocity = 0.5 m/s, initial height in m)
+    #for i in range(len(r0)): yinit.append(r0[i])
     tinit = 0
     tfin = 100
     dt = 1
@@ -92,6 +94,7 @@ def ode_littlerock():
     #want to integrate F using ode45 (from MATLAB) equivalent integrator
     r = ode(F).set_integrator('dopri5')
     r.set_f_params(Wt, rho_a, r_a, r0, interpTenv, interpTdEnv, interpPress)
+    #r.set_f_params(Wt, rho_a, r_a, r0, Num_a, interpTenv, interpTdEnv, interpPress)
     r.set_initial_value(yinit, tinit)
     
     y = np.array(yinit)
@@ -122,19 +125,14 @@ def ode_littlerock():
        
         if Wt > ws - .000001 and Wt < ws + .000001:
             print 'becomes saturated at around:' , r.y[0], 'meters'
-        print ""                    
-        #print "thetaep test: ", thetaep(wv, T, P), thetaeVal
-        print ""
-        
+               
     wvel = y[:,1]
     Tparc = y[:,2]-273.5
     height = y[:,0]
-    Tcheck = y[:,3]
-    Tcheck1 = y[:,4]
-    SS = y[:,6]
+    SS = y[:,3]
     Press = np.array(Press)
-    radius = y[:,5] #will become a 2d array of radii
-    
+    radius = y[:,4] # will become a 2d array of radii = y[:, 3:len(r0)]
+        
     fig1 = plt.figure(1)
     plt.clf()
     plt.ylabel('height above surface (m)')
@@ -149,42 +147,46 @@ def ode_littlerock():
     fig2 = plt.figure(2)
     #will become another figure with a loop, plotting radii
     ax2=fig2.add_subplot(111)
-    plt.plot(radius, height, 'o')
+    plt.plot(radius, -Press, 'o')
+    #for i in len(r0): plt.plot(radius[:,i], -Press)
     labels = ax2.get_xticklabels()
     for label in labels:
        label.set_rotation(30) 
-    plt.legend(loc = 'lower left')
+       #plt.legend(loc = 'lower left')
     plt.xlabel('Radius')
     plt.xlim(.00000001, .00001)
     plt.show()
 
     fig3 = plt.figure(3)
     plt.clf()
-    plt.ylabel('height above surface (m)')
-    ax3=fig3.add_subplot(121)
-    plt.plot(wvel, -Press, 'k *')
-    labels = ax3.get_xticklabels()
-    for label in labels:
-      label.set_rotation(30)
-    plt.xlabel('Vertical Velocity')
+    #plt.ylabel('height above surface (m)')
+    #ax3=fig3.add_subplot(121)
+    #plt.plot(wvel, -Press, 'k *')
+    #labels = ax3.get_xticklabels()
+    #for label in labels:
+    # label.set_rotation(30)
+    #plt.xlabel('Vertical Velocity')
     
-    ax4=fig3.add_subplot(122)
+    ax3=fig3.add_subplot(111)
     plt.plot(Tparc, -Press, 'o')
-    labels = ax4.get_xticklabels()
-    for label in labels:
-       label.set_rotation(30) 
+    #labels = ax4.get_xticklabels()
+    #for label in labels:
+    #   label.set_rotation(30) 
     plt.legend(loc = 'lower left')
     plt.xlabel('Temperature')
     plt.show()
         
 #F returns the buoyancy (and height) and rates of change of Temperature, Droplet Radius and Vapour Pressure with time, at a given time step and height
 def F(t, y, Wt, rho_a, r_a, r0, interpTenv, interpTdEnv, interpPress):
-    yp = np.zeros((7,1))#will be bigger to accomodate radii
+    #def F(t, y, Wt, rho_a, r_a, r0, Num_a, interpTenv, interpTdEnv, interpPress):
+    yp = np.zeros((5,1))#will be bigger to accomodate radii
+    #yp = []
     yp[0] = y[1]
+    #yp.append(y[1])
     #whats a good way of including all the radii here? pass radii as an array eg y[5:25], receive back as an array within an array from calc_Vars, Vars = calc_Vars(), and unpack to fill yp 
-
     #will also be passing Num_a
-    yp[1], yp[2], yp[3], yp[4], yp[5], yp[6] = calc_Vars(y[0], Wt, y[2], y[1], y[5], y[6], rho_a, r_a, r0, 140*10**-3, 3, interpTenv, interpTdEnv, interpPress)
+    yp[1], yp[2], yp[3], yp[4] = calc_Vars(y[0], Wt, y[2], y[1], y[4], y[3], rho_a, r_a, r0, 140*10**-3, 3, interpTenv, interpTdEnv, interpPress)
+    #Vars = calc_Vars(y[0], Wt, y[2], y[1], y[4], y[3], rho_a, r_a, r0, Num_a, 140*10**-3, 3, interpTenv, interpTdEnv, interpPress), yp.extend(Vars[0], Vars[1], Vars[2]), for i in len(r0): yp.append(Vars[3][i])  
     return yp
 
 if __name__ == "__main__":
