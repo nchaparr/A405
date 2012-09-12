@@ -131,7 +131,7 @@ def ode_littlerock():
     height = y[:,0]
     SS = y[:,3]
     Press = np.array(Press)
-    radius = y[:,4] # will become a 2d array of radii = y[:, 3:len(r0)]
+    radius = y[:,4] # will become a 2d array of radii = y[:, 4:3+len(r0)]
         
     fig1 = plt.figure(1)
     plt.clf()
@@ -186,7 +186,7 @@ def F(t, y, Wt, rho_a, r_a, r0, interpTenv, interpTdEnv, interpPress):
     #whats a good way of including all the radii here? pass radii as an array eg y[5:25], receive back as an array within an array from calc_Vars, Vars = calc_Vars(), and unpack to fill yp 
     #will also be passing Num_a
     yp[1], yp[2], yp[3], yp[4] = calc_Vars(y[0], Wt, y[2], y[1], y[4], y[3], rho_a, r_a, r0, 140*10**-3, 3, interpTenv, interpTdEnv, interpPress)
-    #Vars = calc_Vars(y[0], Wt, y[2], y[1], y[4], y[3], rho_a, r_a, r0, Num_a, 140*10**-3, 3, interpTenv, interpTdEnv, interpPress), yp.extend(Vars[0], Vars[1], Vars[2]), for i in len(r0): yp.append(Vars[3][i])  
+    #Vars = calc_Vars(y[0], Wt, y[2], y[1], y[4:3 + len(r0)], y[3], rho_a, r_a, r0, Num_a, 140*10**-3, 3, interpTenv, interpTdEnv, interpPress), yp.extend(Vars[0], Vars[1], Vars[2]), for i in len(r0): yp.append(Vars[3][i])  
     return yp
 
 if __name__ == "__main__":
