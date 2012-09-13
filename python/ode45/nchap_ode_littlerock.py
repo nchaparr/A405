@@ -238,21 +238,29 @@ def F(t, y, Wt, interpTenv, interpTdEnv, interpPress):
     print''
     print'now starting F'
     print''
-    #yp = np.zeros((5,1))#will be bigger to accomodate radii
-    yp = []
-    #yp[0] = y[1]
-    yp.append(y[1])
+    yp = np.zeros((4,1))#will be bigger to accomodate radii
+    #yp = []
+    print''
+    print'heres the shape of yp', yp
+    print''
+    yp[0] = y[1]
+    #yp.append(y[1])
     #whats a good way of including all the radii here? pass radii as an array eg y[5:25], receive back as an array within an array from calc_Vars, Vars = calc_Vars(), and unpack to fill yp 
     #will also be passing Num_a
     #yp[1], yp[2], yp[3], yp[4] = calc_Vars(y[0], Wt, y[2], y[1], y[4], y[3], rho_a, r_a, r0, 140*10**-3, 3, interpTenv, interpTdEnv, interpPress)
     Vars = calc_Vars(y[0], Wt, y[2], y[1], y[4:4 + Num_rad], y[3], rho_a, RelH0, 140*10**-3, 3, interpTenv, interpTdEnv, interpPress)
-    yp.extend([Vars[0], Vars[1], Vars[2]])
+    #yp.extend([Vars[0], Vars[1], Vars[2]])
+    yp[1] = Vars[0] 
+    yp[2] = Vars[1]
+    
+    print 'What is this thing? dSS?', Vars[2], Vars[3] 
 
+    yp[3] = Vars[2]
     for i in range(len(Vars[3])): 
-        yp.append(Vars[3][i])
-        
+        #yp.append(Vars[3][i])
+        yp = np.append(yp, [[Vars[3][i]]], 0)
 
-    yp = np.array(yp)     
+    yp = np.array((yp))     
 
     print''
     print'F is finished now.'
