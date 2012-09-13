@@ -28,13 +28,13 @@ output:
 """
 
 #def calc_Vars(height, Wt, Tparc, Wvel, rad, SS, rho_a, r_a, r0, M_a, I_no, interpTenv, interpTdEnv, interpPress):
-def calc_Vars(height, Wt, Tparc, Wvel, rad, SS, rho_a, RelH0, M_a, I_no, interpTenv, interpTdEnv, interpPress):
+def calc_Vars(height, Wt, r0, r_a, Num_a, Tparc, Wvel, rad, SS, rho_a, M_a, I_no, interpTenv, interpTdEnv, interpPress):
     print''
     print'now CalcVars is running...'
     print''
     #Should include liquid water loading in the virtual temperature
     #Should test for saturation and replace Ws with Wv
-    r0, r_a, Num_a = drop_props(RelH0)
+    #r0, r_a, Num_a = drop_props(RelH0)
     Press = interpPress(height)*100 #Pa
     es = esat(Tparc)
     pressv = (SS + 1)*es
