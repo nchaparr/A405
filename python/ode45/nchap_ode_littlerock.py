@@ -96,7 +96,7 @@ def ode_littlerock():
    
     r = ode(F).set_integrator('dopri5')
 
-    r.set_f_params(Wt, interpTenv, interpTdEnv, interpPress)
+    r.set_f_params(Wt, r0, r_a, Num_a, interpTenv, interpTdEnv, interpPress)
 
     print''
     print'r is about to set initial_value'
@@ -233,7 +233,7 @@ def drop_props(RelH0):
    
 #F returns the buoyancy (and height) and rates of change of Temperature, Droplet Radius and Vapour Pressure with time, at a given time step and height
 #def F(t, y, Wt, rho_a, r_a, r0, interpTenv, interpTdEnv, interpPress):
-def F(t, y, Wt, interpTenv, interpTdEnv, interpPress):
+def F(t, y, Wt, r0, r_a, Num_a, interpTenv, interpTdEnv, interpPress):
     [rho_a, RelH0, Num_rad] = [1775, 90, 24] 
     print''
     print'now starting F'
@@ -248,8 +248,9 @@ def F(t, y, Wt, interpTenv, interpTdEnv, interpPress):
     #whats a good way of including all the radii here? pass radii as an array eg y[5:25], receive back as an array within an array from calc_Vars, Vars = calc_Vars(), and unpack to fill yp 
     #will also be passing Num_a
     #yp[1], yp[2], yp[3], yp[4] = calc_Vars(y[0], Wt, y[2], y[1], y[4], y[3], rho_a, r_a, r0, 140*10**-3, 3, interpTenv, interpTdEnv, interpPress)
-    Vars = calc_Vars(y[0], Wt, y[2], y[1], y[4:4 + Num_rad], y[3], rho_a, RelH0, 140*10**-3, 3, interpTenv, interpTdEnv, interpPress)
+    Vars = calc_Vars(y[0], Wt, r0, r_a, Num_a, y[2], y[1], y[4:4 + Num_rad], y[3], rho_a, 140*10**-3, 3, interpTenv, interpTdEnv, interpPress)
     #yp.extend([Vars[0], Vars[1], Vars[2]])
+
     yp[1] = Vars[0] 
     yp[2] = Vars[1]
     
