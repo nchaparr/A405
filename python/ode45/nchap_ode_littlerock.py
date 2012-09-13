@@ -176,8 +176,8 @@ def ode_littlerock():
     #will become another figure with a loop, plotting radii
     ax2=fig2.add_subplot(111)
     #plt.plot(radius, -Press, 'o')
-    for i in len(r0): 
-        plt.plot(radius[:,i], -Press)
+    for i in range(len(r0)): 
+        plt.plot(radii[:,i], -Press)
     labels = ax2.get_xticklabels()
     for label in labels:
        label.set_rotation(30) 
