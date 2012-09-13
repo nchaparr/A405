@@ -99,8 +99,12 @@ def calc_Vars(height, Wt, Tparc, Wvel, rad, SS, rho_a, RelH0, M_a, I_no, interpT
             drad = (1.0/rad[i])*(1.0*Dv*rhovs/rho_l)*(SS)
         dr.append(drad)
         dwl.append(Num_a[i]*rho_l*4.0*np.pi*(rad[i]**2)*drad)
-    cumdwl = np.cumsum(np.array(dwl))
-    dwv = -cumdwl  
+    cumdwl = np.sum(np.array(dwl))
+    dwv = -cumdwl 
+
+    print''
+    print'is this an array or what? dwv', dwv
+    print''
  
     #if rad <= r0 and (1.0/rad)*(1.0*Dv*rhovs/rho_l)*(SS) < 0:        dr = 0
     #else:
@@ -108,8 +112,7 @@ def calc_Vars(height, Wt, Tparc, Wvel, rad, SS, rho_a, RelH0, M_a, I_no, interpT
 
          #print 'initial radius, radius, dr', r0, rad, dr
         
-    dwl = N_a*rho_l*4.0*np.pi*(rad**2)*dr                
-    dwv = -dwl
+                
     des = 1.0*(c.lv0*es)/(c.Rv*(Tparc**2)) 
 
     #will have three arrays here: Num_a, rad, and dr, so will need to do two np.multiplies() to get a product array for first term here
@@ -125,6 +128,12 @@ def calc_Vars(height, Wt, Tparc, Wvel, rad, SS, rho_a, RelH0, M_a, I_no, interpT
     term2 = (c.eps/Press)*(c.eps*es*c.lv0/(c.Rd*Tparc**2))*dT
 
     dSS =  (Press/(c.eps*es))*(dwv - (1+SS)*(term1 + term2))
+
+    print''
+    print'is this an array or what? dSS', dSS
+    print''
+ 
+
     print''
     print'Now CalcVars is finished.'
     print''               
