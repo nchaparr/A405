@@ -6,7 +6,7 @@ from wsat import wsat
 from findWvWl import findWvWl
 from esat import *
 from T_thetaep import t_thetaep
-
+from nchap_ode_littlerock import drop_props
 """
 For use in 
 
@@ -27,12 +27,14 @@ output:
      = rate of change of droplet radius
 """
 
-def calc_Vars(height, Wt, Tparc, Wvel, rad, SS, rho_a, r_a, r0, M_a, I_no, interpTenv, interpTdEnv, interpPress):
-    #def calc_Vars(height, Wt, Tparc, Wvel, rad, SS, rho_a, r_a, r0, Num_a, M_a, I_no, interpTenv, interpTdEnv, interpPress):
-
+#def calc_Vars(height, Wt, Tparc, Wvel, rad, SS, rho_a, r_a, r0, M_a, I_no, interpTenv, interpTdEnv, interpPress):
+def calc_Vars(height, Wt, Tparc, Wvel, rad, SS, rho_a, RelH0, M_a, I_no, interpTenv, interpTdEnv, interpPress):
+    print''
+    print'now CalcVars is running...'
+    print''
     #Should include liquid water loading in the virtual temperature
     #Should test for saturation and replace Ws with Wv
-    
+    r0, r_a, Num_a = drop_props(RelH0)
     Press = interpPress(height)*100 #Pa
     es = esat(Tparc)
     pressv = (SS + 1)*es
@@ -86,11 +88,23 @@ def calc_Vars(height, Wt, Tparc, Wvel, rad, SS, rho_a, r_a, r0, M_a, I_no, inter
     Dv = 1000.0*(2.21*10**-5)/Press #Diffusion constant, Curry&Webster p144 
     #rad will be an array
   
-    #v_a = [], dr = [], dwl = [], for in in range(len(rad)):v_a.append((1.0*4/3)*np.pi*r_a[i]**3), if rad[i] <= r0[i] and (1.0/rad[i])*(1.0*Dv*rhovs/rho_l)*(SS) < 0:, drad = 0  else:drard = (1.0/rad[i])*(1.0*Dv*rhovs/rho_l)*(SS), dr.append(drad), dwl.append(N_a[i]*rho_l*4.0*np.pi*(rad[i]**2)*drad), cumdwl = np.cumsum(np.array(dwl)), dwv = -cumdwl  
+    v_a = []
+    dr = []
+    dwl = []
+    for i in range(len(rad)):
+        v_a.append((1.0*4/3)*np.pi*r_a[i]**3)
+        if rad[i] <= r0[i] and (1.0/rad[i])*(1.0*Dv*rhovs/rho_l)*(SS) < 0:
+            drad = 0  
+        else:
+            drad = (1.0/rad[i])*(1.0*Dv*rhovs/rho_l)*(SS)
+        dr.append(drad)
+        dwl.append(Num_a[i]*rho_l*4.0*np.pi*(rad[i]**2)*drad)
+    cumdwl = np.cumsum(np.array(dwl))
+    dwv = -cumdwl  
  
-    if rad <= r0 and (1.0/rad)*(1.0*Dv*rhovs/rho_l)*(SS) < 0:        dr = 0
-    else:
-         dr = (1.0/rad)*(1.0*Dv*rhovs/rho_l)*(SS)
+    #if rad <= r0 and (1.0/rad)*(1.0*Dv*rhovs/rho_l)*(SS) < 0:        dr = 0
+    #else:
+    #dr = (1.0/rad)*(1.0*Dv*rhovs/rho_l)*(SS)
 
          #print 'initial radius, radius, dr', r0, rad, dr
         
@@ -111,10 +125,9 @@ def calc_Vars(height, Wt, Tparc, Wvel, rad, SS, rho_a, r_a, r0, M_a, I_no, inter
     term2 = (c.eps/Press)*(c.eps*es*c.lv0/(c.Rd*Tparc**2))*dT
 
     dSS =  (Press/(c.eps*es))*(dwv - (1+SS)*(term1 + term2))
-
-    print'Wt and  micro, bulk wvs', Wt, wvparc, testwv   
-    #print 'SS, dSS, dwv, term1, term2, w, dT', SS, dSS, dwv, term1, term2, Wvel, dT    
-            
+    print''
+    print'Now CalcVars is finished.'
+    print''               
     return dW, dT, dSS, dr 
 
 
