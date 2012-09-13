@@ -249,7 +249,11 @@ def F(t, y, Wt, interpTenv, interpTdEnv, interpPress):
     yp.extend([Vars[0], Vars[1], Vars[2]])
 
     for i in range(len(Vars[3])): 
-        yp.append(Vars[3][i]) 
+        yp.append(Vars[3][i])
+        
+
+    yp = np.array(yp)     
+
     print''
     print'F is finished now.'
     print''
