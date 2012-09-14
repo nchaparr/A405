@@ -29,12 +29,11 @@ output:
 
 #def calc_Vars(height, Wt, Tparc, Wvel, rad, SS, rho_a, r_a, r0, M_a, I_no, interpTenv, interpTdEnv, interpPress):
 def calc_Vars(height, Wt, r0, r_a, Num_a, Tparc, Wvel, rad, SS, rho_a, M_a, I_no, interpTenv, interpTdEnv, interpPress):
-    print''
-    print'now CalcVars is running...'
-    print''
+
     #Should include liquid water loading in the virtual temperature
     #Should test for saturation and replace Ws with Wv
     #r0, r_a, Num_a = drop_props(RelH0)
+
     Press = interpPress(height)*100 #Pa
     es = esat(Tparc)
     pressv = (SS + 1)*es
@@ -55,7 +54,8 @@ def calc_Vars(height, Wt, r0, r_a, Num_a, Tparc, Wvel, rad, SS, rho_a, M_a, I_no
 
     dW = c.g0*(TvDiff/Tvenv) #acceleration or buoyancy
     
-    dWsdT=(Ws + Ws**2)*(1.0*c.lv0/(c.Rv*Tparc**2))#see if there's another derivable dT for the unsaturated adiabat, OR just assume the parcel is never unsaturated
+    dWsdT=(Ws + Ws**2)*(1.0*c.lv0/(c.Rv*Tparc**2))
+    
     dWsdP = -1.0*(c.eps*es)/(Press - es)**2
     
     rho_d = 1000 #kg/m**3 can i assume this?
@@ -63,36 +63,23 @@ def calc_Vars(height, Wt, r0, r_a, Num_a, Tparc, Wvel, rad, SS, rho_a, M_a, I_no
     rho_l =  1000 #can i assume this?
     sigma_w = .076
     M_w = 18*10**-3 #kg/mol
-    v_a = (1.0*4/3)*np.pi*r_a**3 #volume of the aerosol partical in m**3
-    m_a = v_a*rho_a #mass of the aerosol in Kg
-    N_a = 10**9 #number/m**3
 
-     #Test on total water according to adiabats
+    #Test on total water according to adiabats
      
     dWsdT=(Ws + Ws**2)*(1.0*c.lv0/(c.Rv*Tparc**2))
     
     dWsdP = -1.0*(c.eps*es)/(Press - es)**2
 
-    rho_d = 1000 #kg/m**3 can i assume this?
-    Rg = 8.3143
-    rho_l =  1000 #can i assume this?
-    sigma_w = .076
-    M_w = 18*10**-3 #kg/mol
-    v_a = (1.0*4/3)*np.pi*r_a**3 #volume of the aerosol partical in m**3
-    m_a = v_a*rho_a #mass of the aerosol in Kg
-    N_a = 10**9 #number/m**3
-
-     #Test on total water according to adiabats
-    
     rhovs = es/(c.Rv*Tparc) 
-    Dv = 1000.0*(2.21*10**-5)/Press #Diffusion constant, Curry&Webster p144 
-    #rad will be an array
-  
+    
+    Dv = 100000.0*(2.21*10**-5)/Press #Diffusion constant, Curry&Webster p144 
+    
     v_a = []
     dr = []
     dwl = []
     for i in range(len(rad)):
         v_a.append((1.0*4/3)*np.pi*r_a[i]**3)
+
         if rad[i] <= r0[i] and (1.0/rad[i])*(1.0*Dv*rhovs/rho_l)*(SS) < 0:
             drad = 0  
         else:
@@ -101,42 +88,27 @@ def calc_Vars(height, Wt, r0, r_a, Num_a, Tparc, Wvel, rad, SS, rho_a, M_a, I_no
         dwl.append(Num_a[i]*rho_l*4.0*np.pi*(rad[i]**2)*drad)
     cumdwl = np.sum(np.array(dwl))
     dwv = -cumdwl 
-
-    print''
-    print'is this an array or what? dwv', dwv
-    print''
- 
-    #if rad <= r0 and (1.0/rad)*(1.0*Dv*rhovs/rho_l)*(SS) < 0:        dr = 0
-    #else:
-    #dr = (1.0/rad)*(1.0*Dv*rhovs/rho_l)*(SS)
-
-         #print 'initial radius, radius, dr', r0, rad, dr
-        
-                
+                    
     des = 1.0*(c.lv0*es)/(c.Rv*(Tparc**2)) 
-
-    #will have three arrays here: Num_a, rad, and dr, so will need to do two np.multiplies() to get a product array for first term here
-
+   
     if Wt < Ws:
-        dT = (-1.0*c.g0/(c.cpd))*(Wvel)
-        #dT = -(c.Rd*Tparc/(c.cpd*Press))*c.g0*rho*Wvel
+        #dT = (-1.0*c.g0/(c.cpd))*(Wvel)
+        dT = -(c.Rd*Tparc/(c.cpd*Press))*c.g0*rho*Wvel
     else:   
-        dT = -(1.0*c.lv0)/(c.cpd)*dwv - (1.0*c.g0)/(c.cpd)*Wvel 
-        #dT = ((1.0*c.Rd*Tparc)/(c.cpd*Pressd) - (1.0*c.lv0/c.cpd)*dWsdP)/(1 - (c.lv0*Ws/(c.cpd*Tparc)) + (c.lv0*dWsdT)/(c.cpd))*Wvel*(-rho*c.g0)
+        #dT = -(1.0*c.lv0)/(c.cpd)*dwv - (1.0*c.g0)/(c.cpd)*Wvel 
+        dT = ((1.0*c.Rd*Tparc)/(c.cpd*Pressd) - (1.0*c.lv0/c.cpd)*dWsdP)/(1 - (c.lv0*Ws/(c.cpd*Tparc)) + (c.lv0*dWsdT)/(c.cpd))*Wvel*(-rho*c.g0)
         
     term1 = (-c.eps*es/Press**2)*(-c.g0*Press*Wvel/(c.Rd*Tparc)) 
-    term2 = (c.eps/Press)*(c.eps*es*c.lv0/(c.Rd*Tparc**2))*dT
+    term2 = (c.eps/Press)*(des)*dT
 
     dSS =  (Press/(c.eps*es))*(dwv - (1+SS)*(term1 + term2))
-
+    #dSS = (Press/(c.eps*es))*(dwv - (1+SS)*(1.0*c.eps/Press)*(des*dT - (1.0*es/Press)*(-c.g0*rho*Wvel)))
+    
     print''
-    print'is this an array or what? dSS', dSS
-    print''
- 
-
-    print''
-    print'Now CalcVars is finished.'
-    print''               
+    print'Checking bulk and micro wv',testwv , wvparc
+    print'' 
+    
+    
     return dW, dT, dSS, dr 
 
 
