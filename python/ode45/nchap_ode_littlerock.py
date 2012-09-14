@@ -59,7 +59,7 @@ def ode_littlerock():
     #Setting initial properties of parcel
     press0 = interpPress(height0)*100
     Tparc0 = 290
-    Wt = .013
+    Wt = .0125
     ws0 = wsat(Tparc0, press0)
     es0 = esat(Tparc0)
     pressv0 = (1.0*Wt/(Wt + c.eps))*press0
@@ -80,61 +80,39 @@ def ode_littlerock():
     r0, r_a, Num_a = drop_props(RelH0)
     
     Num_rad = len(r0)
-    print''
-    print'Here are my initial Values'
-    print''
+    
     yinit = [height0, 0.5, Tparc0, SS0]
     for i in range(len(r0)):
         yinit.append(r0[i])
-    print''
-    print yinit
-    print''
-        
+           
     tinit = 0
-    tfin = 200
-    dt = 1
+    tfin = 100
+    dt = .1
    
     r = ode(F).set_integrator('dopri5')
 
-    r.set_f_params(Wt, r0, r_a, Num_a, interpTenv, interpTdEnv, interpPress)
-
-    print''
-    print'r is about to set initial_value'
-    print''
-
+    r.set_f_params(Wt, r0, r_a, Num_a, Num_rad, interpTenv, interpTdEnv, interpPress)
+   
     #r.set_f_params(Wt, rho_a, r_a, r0, Num_a, interpTenv, interpTdEnv, interpPress)
     r.set_initial_value(yinit, tinit)
-
-    print ''
-    print'r completed setting initial value'
-    print''
-    
+   
     y = np.array(yinit)
     t = np.array(tinit)
     
     Press = [press0]
     WSat = [ws0]
-    #stop integration when the parcel changes direction, or time runs out
-
-    print''
-    print'about to enter while loop'
-    print''
+    #stop integration when the parcel changes direction, or time runs out   
     
     while r.successful() and r.t < tfin and r.y[1] > 0:
         
-        print''
-        print'r.successful(), r.t, r.y',r.successful() ,r.t, r.y
-        print''
+       
         #find y at the next time step
         #(r.integrate(t) updates the fields r.y and r.t so that r.y = F(t) and r.t = t 
         #where F is the function being integrated)
         
         r.integrate(r.t+dt)
 
-        print''
-        print'have successfully integrated'
-        print''
-        
+                
         #keep track of y at each time step
         y = np.vstack((y, r.y))
         t = np.vstack((t, r.t))
@@ -177,13 +155,13 @@ def ode_littlerock():
     ax2=fig2.add_subplot(111)
     #plt.plot(radius, -Press, 'o')
     for i in range(len(r0)): 
-        plt.plot(radii[:,i], -Press)
+        plt.semilogx(radii[:,i], -Press)
     labels = ax2.get_xticklabels()
     for label in labels:
        label.set_rotation(30) 
        #plt.legend(loc = 'lower left')
     plt.xlabel('Radii')
-    plt.xlim(.00000001, .00001)
+    plt.xlim(10**-8, 10**-4)
     plt.show()
 
     fig3 = plt.figure(3)
@@ -206,56 +184,33 @@ def ode_littlerock():
     plt.show()
 
 def drop_props(RelH0):
-    print''
-    print'now running drop_props'
-    print''
+   
     r_a, Num_a, mass_a, prob_a = Aero_dist()
     rho_a = 1775
-
-    print''
-    print'Relative Humitity', RelH0, 1.0*RelH0/100
-    print''
     
     #r0 = np.array([do_r_find(1.0*RelH0/100, r, rho_a)[0] for r in r_a])
     
     r0 = np.zeros(len(r_a))
     for i in range(len(r_a)):
-        print''
-        print 'index, dry radius',i, r_a[i]
-        print''
+        
         r0[i] = do_r_find(1.0*RelH0/100, r_a[i], rho_a)[0]
 
-    print''
-    print'now leaving drop_props'
-    print''
+   
 
     return r0, r_a, Num_a 
    
 #F returns the buoyancy (and height) and rates of change of Temperature, Droplet Radius and Vapour Pressure with time, at a given time step and height
 #def F(t, y, Wt, rho_a, r_a, r0, interpTenv, interpTdEnv, interpPress):
-def F(t, y, Wt, r0, r_a, Num_a, interpTenv, interpTdEnv, interpPress):
-    [rho_a, RelH0, Num_rad] = [1775, 90, 24] 
-    print''
-    print'now starting F'
-    print''
-    yp = np.zeros((4,1))#will be bigger to accomodate radii
-    #yp = []
-    print''
-    print'heres the shape of yp', yp
-    print''
+def F(t, y, Wt, r0, r_a, Num_a, Num_rad, interpTenv, interpTdEnv, interpPress):
+    #[rho_a, RelH0, Num_rad] = [1775, 90, 24] 
+   
+    yp = np.zeros((4,1))    
     yp[0] = y[1]
-    #yp.append(y[1])
-    #whats a good way of including all the radii here? pass radii as an array eg y[5:25], receive back as an array within an array from calc_Vars, Vars = calc_Vars(), and unpack to fill yp 
-    #will also be passing Num_a
-    #yp[1], yp[2], yp[3], yp[4] = calc_Vars(y[0], Wt, y[2], y[1], y[4], y[3], rho_a, r_a, r0, 140*10**-3, 3, interpTenv, interpTdEnv, interpPress)
     Vars = calc_Vars(y[0], Wt, r0, r_a, Num_a, y[2], y[1], y[4:4 + Num_rad], y[3], rho_a, 140*10**-3, 3, interpTenv, interpTdEnv, interpPress)
-    #yp.extend([Vars[0], Vars[1], Vars[2]])
-
+   
     yp[1] = Vars[0] 
     yp[2] = Vars[1]
     
-    print 'What is this thing? dSS?', Vars[2], Vars[3] 
-
     yp[3] = Vars[2]
     for i in range(len(Vars[3])): 
         #yp.append(Vars[3][i])
@@ -263,9 +218,7 @@ def F(t, y, Wt, r0, r_a, Num_a, interpTenv, interpTdEnv, interpPress):
 
     yp = np.array((yp))     
 
-    print''
-    print'F is finished now.'
-    print''
+   
     return yp
 
 if __name__ == "__main__":
