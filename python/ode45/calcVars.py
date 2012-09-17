@@ -21,23 +21,20 @@ Input:
     plus function handles for T,Td, press soundings
 
 output: 
-    Bout = buoyant acceleration in m/s^2
-     = rate of change of temperature
-     = rate of change of vapour pressure
-     = rate of change of droplet radius
-"""
+    dW = buoyant acceleration in m/s^2
+    dT = rate of change of temperature
+    dr = rate of change of 
+    dSS = rate of change of 
+
+    """
 
 #def calc_Vars(height, Wt, Tparc, Wvel, rad, SS, rho_a, r_a, r0, M_a, I_no, interpTenv, interpTdEnv, interpPress):
 def calc_Vars(height, Wt, r0, r_a, Num_a, Tparc, Wvel, rad, SS, rho_a, M_a, I_no, interpTenv, interpTdEnv, interpPress):
 
-    #Should include liquid water loading in the virtual temperature
-    #Should test for saturation and replace Ws with Wv
-    #r0, r_a, Num_a = drop_props(RelH0)
-
     Press = interpPress(height)*100 #Pa
     es = esat(Tparc)
     pressv = (SS + 1)*es
-    #print 'e', pressv
+   
     wvparc = c.eps*(pressv)/(Press - pressv)
     wlparc = Wt - wvparc
     testwv,testwl = findWvWl(Tparc, Wt, Press)
@@ -93,22 +90,19 @@ def calc_Vars(height, Wt, r0, r_a, Num_a, Tparc, Wvel, rad, SS, rho_a, M_a, I_no
    
     if Wt < Ws:
         #dT = (-1.0*c.g0/(c.cpd))*(Wvel)
-        dT = -(c.Rd*Tparc/(c.cpd*Press))*c.g0*rho*Wvel
+        #dT = -(1.0*c.Rd*Tparc/(c.cpd*Pressd))*c.g0*rho*Wvel
+        dT = -(1.0*c.Rd*Tparc/(c.cpd*Pressd))*(c.g0*rho*Wvel)
     else:   
         #dT = -(1.0*c.lv0)/(c.cpd)*dwv - (1.0*c.g0)/(c.cpd)*Wvel 
-        dT = ((1.0*c.Rd*Tparc)/(c.cpd*Pressd) - (1.0*c.lv0/c.cpd)*dWsdP)/(1 - (c.lv0*Ws/(c.cpd*Tparc)) + (c.lv0*dWsdT)/(c.cpd))*Wvel*(-rho*c.g0)
+        #dT = ((1.0*c.Rd*Tparc)/(c.cpd*Pressd) - (1.0*c.lv0/c.cpd)*dWsdP)/(1 - (c.lv0*Ws/(c.cpd*Tparc)) + (c.lv0*dWsdT)/(c.cpd))*Wvel*(-rho*c.g0)
+
+        dT = (1.0*(c.Rd*Tparc)/(c.cpd*Pressd) - 1.0*(c.lv0*dWsdP)/(c.cpd))*Wvel*(-c.g0*rho)*(1.0/(1 - (c.lv0*Ws)/(c.cpd*Tparc) + (1.0*c.lv0/c.cpd)*dWsdT))
         
     term1 = (-c.eps*es/Press**2)*(-c.g0*Press*Wvel/(c.Rd*Tparc)) 
     term2 = (c.eps/Press)*(des)*dT
 
     dSS =  (Press/(c.eps*es))*(dwv - (1+SS)*(term1 + term2))
-    #dSS = (Press/(c.eps*es))*(dwv - (1+SS)*(1.0*c.eps/Press)*(des*dT - (1.0*es/Press)*(-c.g0*rho*Wvel)))
-    
-    print''
-    print'Checking bulk and micro wv',testwv , wvparc
-    print'' 
-    
-    
+        
     return dW, dT, dSS, dr 
 
 
