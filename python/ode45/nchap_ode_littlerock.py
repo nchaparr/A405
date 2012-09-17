@@ -59,7 +59,7 @@ def ode_littlerock():
     #Setting initial properties of parcel
     press0 = interpPress(height0)*100
     Tparc0 = 290
-    Wt = .0125
+    Wt = .013
     ws0 = wsat(Tparc0, press0)
     es0 = esat(Tparc0)
     pressv0 = (1.0*Wt/(Wt + c.eps))*press0
@@ -72,7 +72,8 @@ def ode_littlerock():
         sys.exit('Saturated.  Change Wt.')       
     else:
         wv0 = Wt
-        
+
+    thetaVal = Tparc0*(c.p0/(press0-pressv0))**(c.Rd/c.cpd)
     thetaeVal = thetaep(wv0, Tparc0, press0)
         
     #aerosol properties
@@ -87,13 +88,13 @@ def ode_littlerock():
            
     tinit = 0
     tfin = 100
-    dt = .1
+    dt = 1
    
     r = ode(F).set_integrator('dopri5')
 
     r.set_f_params(Wt, r0, r_a, Num_a, Num_rad, interpTenv, interpTdEnv, interpPress)
    
-    #r.set_f_params(Wt, rho_a, r_a, r0, Num_a, interpTenv, interpTdEnv, interpPress)
+   
     r.set_initial_value(yinit, tinit)
    
     y = np.array(yinit)
@@ -123,13 +124,28 @@ def ode_littlerock():
         
         T = r.y[2]
         [wv, wl] = findWvWl(T, Wt, P)
+       
+        RelH = r.y[3] + 1
+        pressv = esat(T)*RelH
         
+        wv1 = c.eps*pressv/(P-pressv)
+                
         ws = wsat(T, P)
         WSat.append(ws)
-       
-        #if Wt > ws - .000001 and Wt < ws + .000001:
 
-        #print 'becomes saturated at around:' , r.y[0], 'meters'
+        if ws<Wt:
+            
+            print''
+            print "thetae test", thetaeVal, thetaep(wv1, T, press0)
+        else:
+            print 'thetat test', thetaVal, T*(c.p0/(P-pressv))**(c.Rd/c.cpd)
+            print''
+            
+        print'Checking bulk and micro wv',wv , wv1, 1.0*(wv - wv1)/wv*100, '%' 
+        print'' 
+    
+        if Wt > ws - .000001 and Wt < ws + .000001:
+            print 'becomes saturated at around:' , r.y[0], 'meters'
                
     wvel = y[:,1]
     Tparc = y[:,2]-273.5
@@ -143,20 +159,23 @@ def ode_littlerock():
     plt.clf()
     plt.ylabel('height above surface (m)')
     ax1=fig1.add_subplot(111)
-    plt.plot(WSat, -Press, 'ro')
+    plt.plot(SS, -Press, 'ro')
     labels = ax1.get_xticklabels()
     for label in labels:
         label.set_rotation(30)
-    plt.xlabel('Wv')
-    plt.xlim(0, .017)
+    plt.xlabel('Super Saturation')
+
+    ax2 = ax1.twinx()
+    s2 = np.sin(2*np.pi*t)
+    ax2.plot(SS, height, 'ro' )
+    #plt.xlim(0, .017)
 
     fig2 = plt.figure(2)
-    #will become another figure with a loop, plotting radii
-    ax2=fig2.add_subplot(111)
+    ax3=fig2.add_subplot(111)
     #plt.plot(radius, -Press, 'o')
     for i in range(len(r0)): 
         plt.semilogx(radii[:,i], -Press)
-    labels = ax2.get_xticklabels()
+    labels = ax3.get_xticklabels()
     for label in labels:
        label.set_rotation(30) 
        #plt.legend(loc = 'lower left')
