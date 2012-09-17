@@ -161,7 +161,7 @@ def wsat(Temp, press):
 
 def thetaep(wv, T, p):
     """
-    thetaep(Td, T, p)
+    thetaep(wv, T, p)
 
     Calculates the pseudo equivalent potential temperature of a
     parcel. 
@@ -169,8 +169,8 @@ def thetaep(wv, T, p):
 
     Parameters
     - - - - - -
-    Td : float
-        Dewpoint temperature (K).
+    wv : float
+        Water vapor mass fraction.
     T : float
         Temperature (K).
     p : float
@@ -183,7 +183,7 @@ def thetaep(wv, T, p):
         Pseudo equivalent potential temperature (K).
 
     """
-    Pd = 1.0*(c.eps/(wv+c.eps))*p
+    Pd = 1.0*(c.eps/(wv + c.eps))*p
     thetaval = T*(c.p0/Pd)**(c.Rd/c.cpd)    
     ws = wsat(T, p)
     # $$$   disp('inside theate')
