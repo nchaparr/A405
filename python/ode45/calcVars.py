@@ -54,7 +54,8 @@ def calc_Vars(height, Wt, r0, r_a, Num_a, Tparc, Wvel, rad, SS, rho_a, M_a, I_no
     dWsdT=(Ws + Ws**2)*(1.0*c.lv0/(c.Rv*Tparc**2))
     
     dWsdP = -1.0*(c.eps*es)/(Press - es)**2
-    
+
+    rho_w = 1000
     rho_d = 1000 #kg/m**3 can i assume this?
     Rg = 8.3143
     rho_l =  1000 #can i assume this?
@@ -71,16 +72,17 @@ def calc_Vars(height, Wt, r0, r_a, Num_a, Tparc, Wvel, rad, SS, rho_a, M_a, I_no
     
     Dv = 100000.0*(2.21*10**-5)/Press #Diffusion constant, Curry&Webster p144 
     
-    v_a = []
+    #v_a = []
     dr = []
     dwl = []
     for i in range(len(rad)):
-        v_a.append((1.0*4/3)*np.pi*r_a[i]**3)
-
-        if rad[i] <= r0[i] and (1.0/rad[i])*(1.0*Dv*rhovs/rho_l)*(SS) < 0:
+        #v_a.append((1.0*4/3)*np.pi*r_a[i]**3)
+        a, b = aero_prms(sigma_w, I_no, M_a, M_w, rho_a, r_a[i], rad[i], rho_w, Tparc)
+        #if rad[i] <= r0[i] and (1.0/rad[i])*(1.0*Dv*rhovs/rho_l)*(SS - 1.0*a/rad[i] + 1.0*b/rad[i]**3) < 0:
             drad = 0  
-        else:
-            drad = (1.0/rad[i])*(1.0*Dv*rhovs/rho_l)*(SS)
+            #else:
+        drad = (1.0/rad[i])*(1.0*Dv*rhovs/rho_l)*(SS - 1.0*a/rad[i] + 1.0*b/rad[i]**3)
+        print 'drad', drad     
         dr.append(drad)
         dwl.append(Num_a[i]*rho_l*4.0*np.pi*(rad[i]**2)*drad)
     cumdwl = np.sum(np.array(dwl))
@@ -88,6 +90,7 @@ def calc_Vars(height, Wt, r0, r_a, Num_a, Tparc, Wvel, rad, SS, rho_a, M_a, I_no
                     
     des = 1.0*(c.lv0*es)/(c.Rv*(Tparc**2)) 
    
+
     if Wt < Ws:
         #dT = (-1.0*c.g0/(c.cpd))*(Wvel)
         #dT = -(1.0*c.Rd*Tparc/(c.cpd*Pressd))*c.g0*rho*Wvel
@@ -102,9 +105,22 @@ def calc_Vars(height, Wt, r0, r_a, Num_a, Tparc, Wvel, rad, SS, rho_a, M_a, I_no
     term2 = (c.eps/Press)*(des)*dT
 
     dSS =  (Press/(c.eps*es))*(dwv - (1+SS)*(term1 + term2))
-        
+    print'dSS', dSS    
     return dW, dT, dSS, dr 
 
+def aero_prms(sigma_w, I_no, M_a, M_w, rho_a, r_a, r, rho_w, TempK):
+    
+    v_d = 1.0*4/3*np.pi*(r**3)
+    v_a = 1.0*4/3*np.pi*(r_a**3)
+    m_a = rho_a*v_a
+    rho_d = 1.0*(m_a + (v_d - v_a)*rho_w)/v_d
+        
+    a = 1.0*2*sigma_w/(rho_w*c.Rv*TempK)
+    b = 1.0*(I_no*m_a*M_w)/((1.0*4/3)*M_a*np.pi*rho_w)    
+
+    #print 'test on a and b', a*TempK, 1.0*b/I_no*(1.0*M_a/m_a)
+
+    return a, b
 
     
     
