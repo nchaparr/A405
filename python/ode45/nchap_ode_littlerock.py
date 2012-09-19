@@ -59,13 +59,13 @@ def ode_littlerock():
     #Setting initial properties of parcel
     press0 = interpPress(height0)*100
     Tparc0 = 290
-    Wt = .013
+    Wt = .0135
     ws0 = wsat(Tparc0, press0)
     es0 = esat(Tparc0)
     pressv0 = (1.0*Wt/(Wt + c.eps))*press0
     SS0 = 1.0*pressv0/es0 - 1
     RelH0 = (100*Wt/ws0)
-
+    
     #if saturated, stop
     
     if ws0 <= Wt:
@@ -78,7 +78,7 @@ def ode_littlerock():
         
     #aerosol properties
      
-    r0, r_a, Num_a = drop_props(RelH0)
+    r0, r_a, Num_a = drop_props(RelH0, Tparc0)
     
     Num_rad = len(r0)
     
@@ -112,7 +112,6 @@ def ode_littlerock():
         #where F is the function being integrated)
         
         r.integrate(r.t+dt)
-
                 
         #keep track of y at each time step
         y = np.vstack((y, r.y))
@@ -152,9 +151,8 @@ def ode_littlerock():
     height = y[:,0]
     SS = y[:,3]
     Press = np.array(Press)
-    #radius = y[:,4] # will become a 2d array of 
     radii = y[:, 4:4+len(r0)]
-        
+
     fig1 = plt.figure(1)
     plt.clf()
     plt.ylabel('height above surface (m)')
@@ -174,6 +172,7 @@ def ode_littlerock():
     ax3=fig2.add_subplot(111)
     #plt.plot(radius, -Press, 'o')
     for i in range(len(r0)): 
+
         plt.semilogx(radii[:,i], -Press)
     labels = ax3.get_xticklabels()
     for label in labels:
@@ -192,8 +191,20 @@ def ode_littlerock():
     #for label in labels:
     # label.set_rotation(30)
     #plt.xlabel('Vertical Velocity')
-    
+
+    #distributions of radii: 
+
+    pdf = 1.0*Num_a/np.sum(Num_a)
+    fig3 = plt.figure(3)
+    plt.clf()
     ax3=fig3.add_subplot(111)
+    for i in range(len(Press)):
+        plt.semilogx(radii[i,:], pdf)
+    plt.xlabel('log plot of radii in meters')
+    plt.ylabel('pdf of radii')
+
+    fig4 = plt.figure(4)    
+    ax4=fig4.add_subplot(111)
     plt.plot(Tparc, -Press, 'o')
     #labels = ax4.get_xticklabels()
     #for label in labels:
@@ -201,8 +212,8 @@ def ode_littlerock():
     plt.legend(loc = 'lower left')
     plt.xlabel('Temperature')
     plt.show()
-
-def drop_props(RelH0):
+    
+def drop_props(RelH0, TempK):
    
     r_a, Num_a, mass_a, prob_a = Aero_dist()
     rho_a = 1775
@@ -212,9 +223,7 @@ def drop_props(RelH0):
     r0 = np.zeros(len(r_a))
     for i in range(len(r_a)):
         
-        r0[i] = do_r_find(1.0*RelH0/100, r_a[i], rho_a)[0]
-
-   
+        r0[i] = do_r_find(1.0*RelH0/100, r_a[i], rho_a, TempK)[0]
 
     return r0, r_a, Num_a 
    
