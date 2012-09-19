@@ -38,7 +38,7 @@ def aero(r_a, rho_a):
     m_a = v_a*rho_a #mass of the aerosol in Kg
     return v_a, m_a
 
-def rel_h_shift(r, rel_h_zero, r_a, rho_a):
+def rel_h_shift(r, rel_h_zero, r_a, rho_a, TempK):
     v_d = (1.0*4/3)*np.pi*r**3 # volume of the spherical droplet
     [v_a, m_a] = aero(r_a, rho_a)
     rho_d = 1.0*(m_a + (v_d - v_a)*rho_w)/v_d #density of the droplet
@@ -49,10 +49,10 @@ def rel_h_shift(r, rel_h_zero, r_a, rho_a):
     #b = 1.0*(I_no*m_a*M_w)/((1.0*4/3)*np.pi*M_a*rho_w)
     
     zero = - rel_h_zero + 1 + 1.0*a/r  - 1.0*b/(r)**3#See excercise 6.12  W&H
-    print r, r_a, zero, - rel_h_zero, 1.0*a/r, 1.0*b/(r**3)   
+     
     return zero
 
-def rcrit_zero(r, r_a, rho_a):
+def rcrit_zero(r, r_a, rho_a, TempK):
     [v_a, m_a] = aero(r_a, rho_a)    
     v_d = (1.0*4/3)*np.pi*r**3 # volume of the spherical droplet
     rho_d = 1.0*(m_a + (v_d - v_a)*rho_w)/v_d #density of the droplet
@@ -65,19 +65,19 @@ def rcrit_zero(r, r_a, rho_a):
     return rcrit_zero
 
 
-def find_rcrit(a, b, r_a, rho_a):
-    r_vals = np.linspace(a, b, 100)#create an array of radius values
-    r_crit_rh = np.array([rel_h_shift(r, 0, r_a, rho_a) for r in r_vals])#calculate the relative humidities
+def find_rcrit(a, b, r_a, rho_a, TempK):
+    r_vals = np.linspace(a, b, 1000)#create an array of radius values
+    r_crit_rh = np.array([rel_h_shift(r, 0, r_a, rho_a, TempK) for r in r_vals])#calculate the relative humidities
     index = np.where(r_crit_rh == np.max(r_crit_rh)) #get the index of the maximum value
     a = r_vals[index]#get the corresponding radius, as an estimate to plug into the root finder
-    r_crit = optimize.zeros.newton(rcrit_zero, a, args=(r_a, rho_a))#root find
+    r_crit = optimize.zeros.newton(rcrit_zero, a, args=(r_a, rho_a, TempK))#root find
     return r_crit
 
-def do_r_find(rh, r_a, rho_a):
+def do_r_find(rh, r_a, rho_a, TempK):
     #radius range
     [brackend_l, brackend_r] = [r_a, 10**-5]
 
-    r_crit = find_rcrit(brackend_l, brackend_r, r_a, rho_a)[0]#determine critical radius
+    r_crit = find_rcrit(brackend_l, brackend_r, r_a, rho_a, TempK)[0]#determine critical radius
     print "Critical Radius", r_crit
     brackets = [brackend_l, r_crit, brackend_r] #list for bracket ends
 
@@ -85,11 +85,11 @@ def do_r_find(rh, r_a, rho_a):
     b = brackets[1]
     c = brackets[2]
     print 'trying first bracket'
-    r1 = optimize.zeros.brenth(rel_h_shift, a, b, args = (rh, r_a, rho_a))
+    r1 = optimize.zeros.brenth(rel_h_shift, a, b, args = (rh, r_a, rho_a, TempK))
     print "root found radius in first bracket", r1
 
     try:
-        r2 = optimize.zeros.brenth(rel_h_shift, b, c, args=(rh, r_a, rho_a))
+        r2 = optimize.zeros.brenth(rel_h_shift, b, c, args=(rh, r_a, rho_a, TempK))
     except ValueError:
         r2 = 0
         print "only one radius for this relative humidity"
@@ -103,12 +103,12 @@ if __name__ == "__main__":
     r_a = float(raw_input('aerosol dry radius in microns'))*10**-6
     rho_a = float(raw_input('aerosol dry density density'))
     rh = float(raw_input('relative humidity'))    
-
+    TempK = float(raw_input('Temperature in Kelvin'))
     r_vals = np.linspace(r_a, 10**-5, 1000)#array of radii
     rel_h_vals  = np.zeros(len(r_vals))#empty array for relative humidity values to be calculated
 
     for i in range(len(r_vals)):
-        rel_h_vals[i] = rel_h_shift(r_vals[i], 0, r_a, rho_a)
+        rel_h_vals[i] = rel_h_shift(r_vals[i], 0, r_a, rho_a, TempK)
             
     fig=plt.figure(1)
     fig.clf()
@@ -118,7 +118,7 @@ if __name__ == "__main__":
     fig.canvas.draw()
     plt.show()
     
-    radii = do_r_find(rh, r_a, rho_a)
+    radii = do_r_find(rh, r_a, rho_a, TempK)
     
 
 
