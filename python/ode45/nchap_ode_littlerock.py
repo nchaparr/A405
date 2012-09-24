@@ -64,7 +64,7 @@ def ode_littlerock():
     es0 = esat(Tparc0)
     pressv0 = (1.0*Wt/(Wt + c.eps))*press0
     SS0 = 1.0*pressv0/es0 - 1
-    RelH0 = (100*Wt/ws0)
+    RelH0 = SS0 + 1
     
     #if saturated, stop
     
@@ -79,7 +79,7 @@ def ode_littlerock():
     #aerosol properties
      
     r0, r_a, Num_a = drop_props(RelH0, Tparc0)
-    
+        
     Num_rad = len(r0)
     
     yinit = [height0, 0.5, Tparc0, SS0]
@@ -87,7 +87,7 @@ def ode_littlerock():
         yinit.append(r0[i])
            
     tinit = 0
-    tfin = 100
+    tfin = 200
     dt = 1
    
     r = ode(F).set_integrator('dopri5')
@@ -179,7 +179,7 @@ def ode_littlerock():
        label.set_rotation(30) 
        #plt.legend(loc = 'lower left')
     plt.xlabel('Radii')
-    plt.xlim(10**-8, 10**-4)
+    #plt.xlim(10**-8, 10**-4)
     plt.show()
 
     fig3 = plt.figure(3)
@@ -223,9 +223,9 @@ def drop_props(RelH0, TempK):
     r0 = np.zeros(len(r_a))
     for i in range(len(r_a)):
         
-        r0[i] = do_r_find(1.0*RelH0/100, r_a[i], rho_a, TempK)[0]
+        r0[i] = do_r_find(1.0*RelH0, r_a[i], rho_a, TempK)[0]
 
-    return r0, r_a, Num_a 
+    return r0*10**6, r_a*10**6, Num_a 
    
 #F returns the buoyancy (and height) and rates of change of Temperature, Droplet Radius and Vapour Pressure with time, at a given time step and height
 #def F(t, y, Wt, rho_a, r_a, r0, interpTenv, interpTdEnv, interpPress):
