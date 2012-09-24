@@ -30,7 +30,7 @@ Rv = 461.51
 #Dry aerosol properties, and other given values:
 rho_a = 1.775*10**3 #density of hydrated amonium sulfate in Kg/m**3
 I_no = 3 #distinct ions from aerosol
-TempK = 290 #surrounding temperature in Kelvin
+#TempK = 290 #surrounding temperature in Kelvin
 M_a = 140*10**-3 #molecular mass of the aerosol in Kg/mol
 
 def aero(r_a, rho_a):
@@ -60,7 +60,7 @@ def rcrit_zero(r, r_a, rho_a, TempK):
     rho_dw = (v_d - v_a)*rho_w/v_d #density of water in droplet
     a = 1.0*2*sigma_w/(rho_d*Rv*TempK)
     #b = 1.0*(I_no*m_a*M_w)/((1.0*4/3)*M_a*np.pi*rho_d)
-    b = (1.0*(I_no*rho_a*M_w)/(M_a*rho_d))*(r_a**3)    
+    b = (1.0*(I_no*rho_a*M_w)/(M_a*rho_w))*(r_a**3)    
     rcrit_zero = np.sqrt(3.0*b/a) - r #See excercise 6.12 in W&H
     return rcrit_zero
 
