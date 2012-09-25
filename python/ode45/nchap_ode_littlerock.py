@@ -64,12 +64,14 @@ def ode_littlerock():
     es0 = esat(Tparc0)
     pressv0 = (1.0*Wt/(Wt + c.eps))*press0
     SS0 = 1.0*pressv0/es0 - 1
+    if SS0<0:
+        SS0 = 0
     RelH0 = SS0 + 1
     
     #if saturated, stop
     
     if ws0 <= Wt:
-        sys.exit('Saturated.  Change Wt.')       
+       sys.exit('Saturated.  Change Wt.')       
     else:
         wv0 = Wt
 
@@ -87,7 +89,7 @@ def ode_littlerock():
         yinit.append(r0[i])
            
     tinit = 0
-    tfin = 200
+    tfin = 10
     dt = 1
    
     r = ode(F).set_integrator('dopri5')
@@ -112,10 +114,17 @@ def ode_littlerock():
         #where F is the function being integrated)
         
         r.integrate(r.t+dt)
+
+        print ''
+        print 'integrated successfully!!'
+        print ''
                 
         #keep track of y at each time step
         y = np.vstack((y, r.y))
         t = np.vstack((t, r.t))
+        print''
+        print'time', r.t
+        print''
         P = interpPress(r.y[0])*100
         Press.append(P)
         
@@ -157,7 +166,7 @@ def ode_littlerock():
     plt.clf()
     plt.ylabel('height above surface (m)')
     ax1=fig1.add_subplot(111)
-    plt.plot(SS, -Press, 'ro')
+    plt.plot(SS, t, 'ro')
     labels = ax1.get_xticklabels()
     for label in labels:
         label.set_rotation(30)
@@ -193,7 +202,9 @@ def ode_littlerock():
     #plt.xlabel('Vertical Velocity')
 
     #distributions of radii: 
-
+    print ''
+    print'what are these?', Num_a, np.sum(Num_a)
+    print''
     pdf = 1.0*Num_a/np.sum(Num_a)
     fig3 = plt.figure(3)
     plt.clf()
@@ -214,8 +225,7 @@ def ode_littlerock():
     plt.show()
     
 def drop_props(RelH0, TempK):
-   
-    r_a, Num_a, mass_a, prob_a = Aero_dist()
+    r_a, Num_a, mass_a, prob_a = np.array([1*10**-9]), np.array([10**9]), 0, 0 #Aero_dist()
     rho_a = 1775
     
     #r0 = np.array([do_r_find(1.0*RelH0/100, r, rho_a)[0] for r in r_a])
@@ -223,9 +233,9 @@ def drop_props(RelH0, TempK):
     r0 = np.zeros(len(r_a))
     for i in range(len(r_a)):
         
-        r0[i] = do_r_find(1.0*RelH0, r_a[i], rho_a, TempK)[0]
+        r0[i] = do_r_find(RelH0, r_a[i], rho_a, TempK)[0]
 
-    return r0*10**6, r_a*10**6, Num_a 
+    return r0, r_a, Num_a 
    
 #F returns the buoyancy (and height) and rates of change of Temperature, Droplet Radius and Vapour Pressure with time, at a given time step and height
 #def F(t, y, Wt, rho_a, r_a, r0, interpTenv, interpTdEnv, interpPress):
