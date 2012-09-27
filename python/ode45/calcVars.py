@@ -113,12 +113,12 @@ def calc_Vars(height, Wt, r0, r_a, Num_a, Tparc, Wvel, rad, SS, rho_a, M_a, I_no
     term2 = (c.eps/Press)*(des)*dT
 
     dSS =  (Press/(c.eps*es))*(dwv - (1+SS)*(term1 + term2))
-    print''
-    print'SS, dSS',SS, dSS
-    print 'Wvel, dW', Wvel, dW
-    print 'T, dT', Tparc, dT
-    print 'r, dr', rad, drad
-    print''
+    #print''
+    #print'SS, dSS',SS, dSS
+    #print 'Wvel, dW', Wvel, dW
+    #print 'T, dT', Tparc, dT
+    #print 'r, dr', rad, dr
+    #print''
     return dW, dT, dSS, dr 
 
 def aero_prms(sigma_w, I_no, M_a, M_w, rho_a, r_a, r, rho_w, TempK):
