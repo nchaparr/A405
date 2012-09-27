@@ -64,8 +64,8 @@ def ode_littlerock():
     es0 = esat(Tparc0)
     pressv0 = (1.0*Wt/(Wt + c.eps))*press0
     SS0 = 1.0*pressv0/es0 - 1
-    if SS0<0:
-        SS0 = 0
+    #if SS0<0:
+    #   SS0 = 0
     RelH0 = SS0 + 1
     
     #if saturated, stop
@@ -89,10 +89,10 @@ def ode_littlerock():
         yinit.append(r0[i])
            
     tinit = 0
-    tfin = 10
+    tfin = 100
     dt = 1
    
-    r = ode(F).set_integrator('dopri5')
+    r = ode(F).set_integrator('dopri5', nsteps = 1000)
 
     r.set_f_params(Wt, r0, r_a, Num_a, Num_rad, interpTenv, interpTdEnv, interpPress)
    
@@ -202,9 +202,9 @@ def ode_littlerock():
     #plt.xlabel('Vertical Velocity')
 
     #distributions of radii: 
-    print ''
-    print'what are these?', Num_a, np.sum(Num_a)
-    print''
+    #print ''
+    #print'what are these?', Num_a, np.sum(Num_a)
+    #print''
     pdf = 1.0*Num_a/np.sum(Num_a)
     fig3 = plt.figure(3)
     plt.clf()
@@ -225,7 +225,7 @@ def ode_littlerock():
     plt.show()
     
 def drop_props(RelH0, TempK):
-    r_a, Num_a, mass_a, prob_a = np.array([1*10**-9]), np.array([10**9]), 0, 0 #Aero_dist()
+    r_a, Num_a, mass_a, prob_a = Aero_dist()
     rho_a = 1775
     
     #r0 = np.array([do_r_find(1.0*RelH0/100, r, rho_a)[0] for r in r_a])
