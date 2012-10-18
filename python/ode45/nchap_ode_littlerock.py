@@ -65,7 +65,7 @@ def ode_littlerock():
     pressv0 = (1.0*Wt/(Wt + c.eps))*press0
     SS0 = 1.0*pressv0/es0 - 1
     #if SS0<0:
-    #   SS0 = 0
+    #  SS0 = 0
     RelH0 = SS0 + 1
     
     #if saturated, stop
@@ -90,9 +90,9 @@ def ode_littlerock():
            
     tinit = 0
     tfin = 100
-    dt = 1
+    dt = .1
    
-    r = ode(F).set_integrator('dopri5', nsteps = 1000)
+    r = ode(F).set_integrator('vode', method = 'BDF', order=15, nsteps = 300000)
 
     r.set_f_params(Wt, r0, r_a, Num_a, Num_rad, interpTenv, interpTdEnv, interpPress)
    
@@ -115,16 +115,23 @@ def ode_littlerock():
         
         r.integrate(r.t+dt)
 
-        print ''
-        print 'integrated successfully!!'
-        print ''
+        #print ''
+        #print 'integrated successfully!!'
+        #print ''
                 
         #keep track of y at each time step
         y = np.vstack((y, r.y))
         t = np.vstack((t, r.t))
-        print''
-        print'time', r.t
-        print''
+        Fun=np.asmatrix(r.y).transpose()
+        #print''
+        #print'time', r.t
+        #print'F', Fun.transpose()
+        #print""
+        dF = F(t, r.y, Wt, r0, r_a, Num_a, Num_rad, interpTenv, interpTdEnv, interpPress)
+        #print 'dF', dF
+        #print''
+        #print np.divide(dF, Fun)
+        #print''
         P = interpPress(r.y[0])*100
         Press.append(P)
         
@@ -148,7 +155,7 @@ def ode_littlerock():
         else:
             print 'thetat test', thetaVal, T*(c.p0/(P-pressv))**(c.Rd/c.cpd)
             print''
-            
+        
         print'Checking bulk and micro wv',wv , wv1, 1.0*(wv - wv1)/wv*100, '%' 
         print'' 
     
@@ -164,35 +171,38 @@ def ode_littlerock():
 
     fig1 = plt.figure(1)
     plt.clf()
-    plt.ylabel('height above surface (m)')
+    plt.ylabel('Height')
     ax1=fig1.add_subplot(111)
-    plt.plot(SS, t, 'ro')
+    
+    plt.plot(SS, height, 'ro')
     labels = ax1.get_xticklabels()
     for label in labels:
         label.set_rotation(30)
-    plt.xlabel('Super Saturation')
-
-    ax2 = ax1.twinx()
+    plt.xlabel('Height')
+    #ax1.invert_yaxis()
+    #ax2 = ax1.twinx()
     s2 = np.sin(2*np.pi*t)
-    ax2.plot(SS, height, 'ro' )
+    #ax2.plot(SS, height, 'ro' )
     #plt.xlim(0, .017)
 
     fig2 = plt.figure(2)
-    ax3=fig2.add_subplot(111)
+    ax2=fig2.add_subplot(111)
+    
     #plt.plot(radius, -Press, 'o')
     for i in range(len(r0)): 
 
-        plt.semilogx(radii[:,i], -Press)
-    labels = ax3.get_xticklabels()
+        plt.semilogx(radii[:,i], height)
+    labels = ax2.get_xticklabels()
     for label in labels:
        label.set_rotation(30) 
        #plt.legend(loc = 'lower left')
+       #ax2.invert_yaxis()
     plt.xlabel('Radii')
     #plt.xlim(10**-8, 10**-4)
     plt.show()
 
-    fig3 = plt.figure(3)
-    plt.clf()
+    #fig3 = plt.figure(3)
+    #plt.clf()
     #plt.ylabel('height above surface (m)')
     #ax3=fig3.add_subplot(121)
     #plt.plot(wvel, -Press, 'k *')
@@ -209,19 +219,25 @@ def ode_littlerock():
     fig3 = plt.figure(3)
     plt.clf()
     ax3=fig3.add_subplot(111)
+    
     for i in range(len(Press)):
-        plt.semilogx(radii[i,:], pdf)
-    plt.xlabel('log plot of radii in meters')
-    plt.ylabel('pdf of radii')
+        if i == 99:
+            plt.semilogx(radii[i,:], pdf, 'o' )
+            
+    plt.xlabel('')
+    plt.ylabel('dr(D)/d(lnr)')
 
     fig4 = plt.figure(4)    
     ax4=fig4.add_subplot(111)
-    plt.plot(Tparc, -Press, 'o')
+    
+    plt.plot(Tparc, height, 'o')
     #labels = ax4.get_xticklabels()
     #for label in labels:
     #   label.set_rotation(30) 
     plt.legend(loc = 'lower left')
     plt.xlabel('Temperature')
+    plt.ylabel('Height')    
+    #ax4.invert_yaxis()
     plt.show()
     
 def drop_props(RelH0, TempK):
@@ -256,6 +272,9 @@ def F(t, y, Wt, r0, r_a, Num_a, Num_rad, interpTenv, interpTdEnv, interpPress):
 
     yp = np.array((yp))     
 
+    #print''
+    #print'dF'
+    #print''
    
     return yp
 
