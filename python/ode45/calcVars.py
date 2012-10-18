@@ -82,10 +82,11 @@ def calc_Vars(height, Wt, r0, r_a, Num_a, Tparc, Wvel, rad, SS, rho_a, M_a, I_no
         #   drad = 0  
         #else:
         #print 'difference in SS values', (SS - 1.0*a/rad[i] + 1.0*b/rad[i]**3)
-        if (SS - 1.0*a/rad[i] + 1.0*b/rad[i]**3) < 0:
+        if ((SS - 1.0*a/rad[i] + 1.0*b/rad[i]**3) < 0 and rad[i] <= r0[i]):
+            #print "zero drad"
             drad = 0
         else:
-            drad = (1.0/rad[i])*(1.0*Dv*rhovs/rho_l)*(SS - 1.0*a/rad[i] + 1.0*b/rad[i]**3)
+             drad = (1.0/rad[i])*(1.0*Dv*rhovs/rho_l)*(SS - 1.0*a/rad[i] + 1.0*b/rad[i]**3)
         #    drad = (1.0/rad[i])*(1.0*Dv*rhovs/rho_l)*(SS)
         #print 'drad', drad, SS + 1, 1 + 1.0*a/rad[i] - 1.0*b/rad[i]**3     
         dr.append(drad)
@@ -111,7 +112,7 @@ def calc_Vars(height, Wt, r0, r_a, Num_a, Tparc, Wvel, rad, SS, rho_a, M_a, I_no
         
     term1 = (-c.eps*es/Press**2)*(-c.g0*Press*Wvel/(c.Rd*Tparc)) 
     term2 = (c.eps/Press)*(des)*dT
-
+    dwv = 0
     dSS =  (Press/(c.eps*es))*(dwv - (1+SS)*(term1 + term2))
     #print''
     #print'SS, dSS',SS, dSS
@@ -128,8 +129,8 @@ def aero_prms(sigma_w, I_no, M_a, M_w, rho_a, r_a, r, rho_w, TempK):
     m_a = rho_a*v_a
     rho_d = 1.0*(m_a + (v_d - v_a)*rho_w)/v_d
         
-    a = 1.0*2*sigma_w/(rho_d*c.Rv*TempK)
-    b = (1.0*(I_no*rho_a*M_w)/(M_a*rho_w))*(r_a**3)    
+    a = 1.0*2*sigma_w/(rho_w*c.Rv*TempK)
+    b = (1.0*(I_no*rho_a*M_w)/(M_a*rho_d))*(r_a**3)    
 
     #print 'test on a and b', a*TempK, 1.0*b/I_no*(1.0*M_a/m_a)
 
