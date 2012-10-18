@@ -43,10 +43,10 @@ def rel_h_shift(r, rel_h_zero, r_a, rho_a, TempK):
     [v_a, m_a] = aero(r_a, rho_a)
     rho_d = 1.0*(m_a + (v_d - v_a)*rho_w)/v_d #density of the droplet
 
-    a = 1.0*(2*sigma_w)/(rho_d*Rv*TempK)
+    a = 1.0*(2*sigma_w)/(rho_w*Rv*TempK)
     
-    b = (1.0*(I_no*rho_a*M_w)/(M_a*rho_w))*(r_a**3)
-    #b = 1.0*(I_no*m_a*M_w)/((1.0*4/3)*np.pi*M_a*rho_w)
+    #b = (1.0*(I_no*rho_a*M_w)/(M_a*rho_w))*(r_a**3)
+    b = 1.0*(I_no*m_a*M_w)/((1.0*4/3)*np.pi*M_a*rho_d)
     
     zero = - rel_h_zero + 1 + 1.0*a/r  - 1.0*b/(r)**3#See excercise 6.12  W&H
      
@@ -59,8 +59,8 @@ def rcrit_zero(r, r_a, rho_a, TempK):
     m_d = rho_d*v_d # mass of the droplet
     rho_dw = (v_d - v_a)*rho_w/v_d #density of water in droplet
     a = 1.0*2*sigma_w/(rho_d*Rv*TempK)
-    #b = 1.0*(I_no*m_a*M_w)/((1.0*4/3)*M_a*np.pi*rho_d)
-    b = (1.0*(I_no*rho_a*M_w)/(M_a*rho_w))*(r_a**3)    
+    b = 1.0*(I_no*m_a*M_w)/((1.0*4/3)*M_a*np.pi*rho_d)
+    #b = (1.0*(I_no*rho_a*M_w)/(M_a*rho_w))*(r_a**3)    
     rcrit_zero = np.sqrt(3.0*b/a) - r #See excercise 6.12 in W&H
     return rcrit_zero
 
@@ -113,8 +113,8 @@ if __name__ == "__main__":
     fig=plt.figure(1)
     fig.clf()
     ax1=fig.add_subplot(111)
-    plt.plot(r_vals, rel_h_vals, 'o')
-    plt.xlim(-10**-5, 10**-5 )
+    plt.plot(r_vals, rel_h_vals, '-')
+    plt.ylim(.99, 1.01)
     fig.canvas.draw()
     plt.show()
     
