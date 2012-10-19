@@ -4,19 +4,22 @@ import matplotlib.pyplot as plt
 import sys
 
 """"
-    Purpose: 
+Purpose:
+         To find the equilibrium radius of a droplet nucleated by aerosol
+         given a relative humidity value. For use in nchap_ode_littlerock()
 
-    To find the radius of a droplet nucleated by aerosol
-    given a relative humidity value
+Steps:
 
-    Steps:
+         plot relative humidity as calculated by the given function: rel_h_shift()
+         against radius
 
-    plot relative humidity as calculated by the given function: rel_h_shift()
-    against radius
+         set up brackets centered on critical radius which is find using: find_r_crit(), r_crit_zero()    
 
-    set up brackets centered on critical radius which is find using: find_r_crit(), r_crit_zero()    
+         root find over both bracketed intervals: do_r_find()
 
-    root find over both bracketed intervals: do_r_find()
+Functions defined:
+          see Steps
+    
 """
 
 #Constants:
@@ -30,7 +33,6 @@ Rv = 461.51
 #Dry aerosol properties, and other given values:
 rho_a = 1.775*10**3 #density of hydrated amonium sulfate in Kg/m**3
 I_no = 3 #distinct ions from aerosol
-#TempK = 290 #surrounding temperature in Kelvin
 M_a = 140*10**-3 #molecular mass of the aerosol in Kg/mol
 
 def aero(r_a, rho_a):
@@ -49,7 +51,6 @@ def rel_h_shift(r, rel_h_zero, r_a, rho_a, TempK):
     b = 1.0*(I_no*m_a*M_w)/((1.0*4/3)*np.pi*M_a*rho_d)
     
     zero = - rel_h_zero + 1 + 1.0*a/r  - 1.0*b/(r)**3#See excercise 6.12  W&H
-     
     return zero
 
 def rcrit_zero(r, r_a, rho_a, TempK):
@@ -76,7 +77,6 @@ def find_rcrit(a, b, r_a, rho_a, TempK):
 def do_r_find(rh, r_a, rho_a, TempK):
     #radius range
     [brackend_l, brackend_r] = [r_a, 10**-5]
-
     r_crit = find_rcrit(brackend_l, brackend_r, r_a, rho_a, TempK)[0]#determine critical radius
     print "Critical Radius", r_crit
     brackets = [brackend_l, r_crit, brackend_r] #list for bracket ends
@@ -87,7 +87,6 @@ def do_r_find(rh, r_a, rho_a, TempK):
     print 'trying first bracket'
     r1 = optimize.zeros.brenth(rel_h_shift, a, b, args = (rh, r_a, rho_a, TempK))
     print "root found radius in first bracket", r1
-
     try:
         r2 = optimize.zeros.brenth(rel_h_shift, b, c, args=(rh, r_a, rho_a, TempK))
     except ValueError:
@@ -99,7 +98,6 @@ def do_r_find(rh, r_a, rho_a, TempK):
     return [r1, r2]
     
 if __name__ == "__main__":
-
     r_a = float(raw_input('aerosol dry radius in microns'))*10**-6
     rho_a = float(raw_input('aerosol dry density density'))
     rh = float(raw_input('relative humidity'))    
