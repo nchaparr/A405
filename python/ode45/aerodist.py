@@ -2,33 +2,26 @@ import numpy as np
 import matplotlib.pyplot as plt 
 
 """
-For use in
+
+For use in nchap_ode_littlerock.py
 
 Gives the number and mass of aerosol of a particular diameter as determined by the lognormal distribution
 
-"""
-"""
-LogDist(): 
-   out=logDist(themass,Amp,meanval,logsd)
-   return a vector with the mass (kg) in each bin specified by
-   themass, using the lognormal distribution given in the
-   aerosol notes.  Input: themass (kg), meanval(kg), logsd
-   unitless)
-   utput:  kg/logbinwidth, that is, out(i)*(log(themass(i+1)) - log(themass(i)))   
-   is the aerosol mass, in kg in bin(i), for aerosols with logmss
-   between log(themass(i)) and log(themass(i+1))
+Functions Defined:
+         LogDist(): 
+         Returns a vector with the mass (kg) in each bin 
+         specified by themass, using the lognormal 
+         distribution. 
+
 """
   
 def logDist(themass, Amp, meanval, logsd):
     theexp=np.exp(-0.5*(((np.log(themass) - np.log(meanval))/logsd))**2.);
     out=Amp/(np.sqrt(2*np.pi)*logsd)*theexp;
-    print 'array of masses', themass
-    print 'probabilities', out
     return out 
 
 def Aero_dist():
 # setup the underlying  lognormal mass distribution
-
 #distribution parameters
     rhoaero = 1775
     Mtot =.25e-9 #0.25 mug/m^3
@@ -55,20 +48,14 @@ def Aero_dist():
     thenum = np.divide(1.0*out, themass)
 
     end = len(themass)
-    print 'end', end
-# now work backwards to check our number distribution
     dlogMass = np.subtract(np.log(themass[1:end]), np.log(themass[0:end-1]))
-    print 'check total mass:'
     binmass = np.array([x*y for x in out[0:end-1]for y in dlogMass])
     totmass=np.sum(binmass)
-    print totmass
-    print 'check total number'
     end = len(thenum)
     binnum = np.array([x*y for x in thenum[1:end] for y in dlogMass])
     totnum = np.sum(binnum)
-    print totnum
-
     return dryrad, thenum, themass, out
+
 #plot the distribution
 
 if __name__ == "__main__":
@@ -77,11 +64,8 @@ if __name__ == "__main__":
     fig=plt.figure(1)
     fig.clf()
     ax1 = fig.add_subplot(111)
-    #plt.semilogx(themass,out)
     plt.plot(themass, out)
-    #plt.title('lognormal mass distribution')
     plt.xlim(-10**-17, 10**-15)
-    #plt.ylabel('m x mu(m) (kg/m^3/per log binwidth)')
     plt.show()
 
    
